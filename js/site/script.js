@@ -192,7 +192,7 @@ var app = new Vue(
 				{
 					product.price = null;
 					product.link = null;
-					product.size = "Niet gevonden, pas je boodschappenlijstje aan...";
+					product.size = "Niet gevonden.";
 				}
 
 				return product;
@@ -217,7 +217,7 @@ var app = new Vue(
 				product.price = price;
 				if (product.price)
 				{
-					product.size = "Product niet teruggevonden, prijs is een inschatting op basis van prijzen bij andere winkels.";
+					product.size = "Niet gevonden, geschatte prijs.";
 				}
 				return product;
 			});
