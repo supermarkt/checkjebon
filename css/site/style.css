@@ -1,0 +1,14 @@
+body
+{
+	font-family: "Lato", sans-serif;
+}
+
+.caps
+{
+	text-transform: uppercase;
+}
+
+.smallcaps
+{
+	font-variant-caps: all-small-caps;
+}

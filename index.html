@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Checkjebon.nl - Goedkopere boodschappen</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="icon" href="/favicon.ico" type="image/x-icon">
+		<meta name="description" content="Scan je supermarktbon om er achter te komen waar je goedkoper kunt winkelen." />
+		<link rel="stylesheet" href="/css/w3/w3.css">
+		<link rel="stylesheet" href="/css/site/style.css">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<!-- Vue -->
+		<script src="/js/vue/vue.js"></script>
+		<!--<script src="https://unpkg.com/tesseract.js@v2.1.0/dist/tesseract.min.js"></script>-->
+		<script src="https://unpkg.com/tesseract.js@3.0.3/dist/tesseract.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+	</head>
+	<body class="w3-gray">
+		<div class="w3-content" style="max-width: 2000px; padding-top: 0px;" id="checkjebon">
+		
+			<div class="w3-blue-grey">
+				<div class="w3-container w3-content w3-padding-64" style="max-width:800px">
+					<h2 class="w3-wide w3-center caps">Checkjebon.nl</h2>
+					<p class="w3-opacity w3-center">Bekijk wat je kwijt zou zijn voor dezelfde boodschappen bij een andere supermarkt.</p>
+					<div class="w3-center">
+						<button class="w3-btn w3-ripple w3-amber" @click="scan"><i class="fa fa-camera"></i> Scan je kassabon</button>
+						<button class="w3-btn w3-ripple w3-light-gray" @click="example">Voorbeeld</button>
+						<input type="file" id="file-selector" style="display: none;">
+					</div>
+					<p class="w3-center">
+						- of -
+					</p>
+					<div class="w3-center">
+						<label>
+							<p>Schrijf hier je boodschappenlijstje:</p>
+							<textarea class="w3-input" style="height: 300px;" v-model="shoppinglist" @input="clear" placeholder="Tik hier je boodschappen in of gebruik de scan knop om je laatste kassabon te scannen.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel"></textarea>
+						</label>
+					</div>
+					<p class="w3-center">
+						Op zoek naar een specifiek merk? Tik de merknaam er dan bij.
+					</p>
+					<p class="w3-center">
+						<button class="w3-btn w3-ripple w3-amber" @click="search"><i class="fa fa-search"></i> Zoek de beste prijzen</button>
+					</p>
+				</div>
+			</div>
+
+			<div class="w3-light-gray" id="supermarkets" v-show="supermarkets.length > 0">
+				<div class="w3-container w3-content w3-padding-64" style="max-width:800px">
+				
+					<h2 class="w3-wide w3-center caps">Totaalprijs</h2>
+					
+					<ul class="w3-ul w3-card-4 w3-light-gray w3-hoverable">
+						<li class="w3-bar" :class="{'w3-amber': supermarket.n == selectSupermarket?.n}" v-for="supermarket in supermarkets" :key="supermarket.n" @click="selectSupermarket=supermarket; select()">
+							<span class="w3-bar-item w3-button w3-xlarge w3-right">{{ supermarket.totalPrice | formatPrice }}</span>
+							<img v-bind:src="supermarket.i" class="w3-bar-item w3-circle" style="width:85px">
+							<div class="w3-bar-item">
+								<span class="w3-large">
+									{{supermarket.c}}
+								</span><br>
+								<span class="w3-text-blue-gray">
+									{{supermarket.d.length}} producten
+									<span v-if="supermarket.notFound > 0"> - Let op, {{supermarket.notFound}} product{{supermarket.notFound==1?"":"en"}} niet gevonden.</span>
+								</span>
+							</div>
+						</li>
+					</ul>
+					
+				</div>
+			</div>
+			
+			<div class="w3-blue-grey" id="shoppinglist" v-show="selectSupermarket">
+				<div class="w3-container w3-content w3-padding-64" style="max-width:800px">
+					
+					<h2 class="w3-wide w3-center caps">{{ selectSupermarket?.c }}</h2>
+					
+					<ul class="w3-ul w3-card-4 w3-light-gray w3-hoverable">
+						<li class="w3-bar" v-for="product in products">
+							<a v-bind:href="product.link" class="w3-block" target="_blank" :class="{'w3-text-blue-gray': !product.link}">
+								<span class="w3-bar-item w3-button w3-xlarge w3-right">{{ !product.link && product.price ? "~" : "" }}{{ product.price | formatPrice }}</span>
+								<div class="w3-bar-item">
+									<span class="w3-large">{{ product.name }}</span><br>
+									<span class="w3-text-blue-gray">{{ product.size | formatAmount }}</span>
+								</div>
+							</a>
+						</li>
+					</ul>
+					
+				</div>
+			</div>
+
+			<div class="w3-light-gray">
+				<div class="w3-container w3-content w3-padding-64" style="max-width:800px">
+					<h2 class="w3-wide w3-center caps">Over Checkjebon.nl</h2>
+					<p class="w3-opacity w3-center">Prijzen in supermarkten veranderen regelmatig, Checkjebon.nl werkt ze wekelijks bij en vertelt je waar je het goedkoopst uit bent voor je boodschappen. Verder is Checkjebon.nl een open source project en ook de gebruikte supermarktdata is gratis te gebruiken.</p>
+				</div>
+			</div>
+		</div>
+		<script src="/js/site/script.js"></script>
+	</body>
+</html>
