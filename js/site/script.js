@@ -232,6 +232,11 @@ var app = new Vue(
 			this.selectSupermarket = null;
 			this.supermarkets = [];
 			localStorage.setItem("shoppinglist", this.shoppinglist);
+		},
+		clear: function()
+		{
+			this.shoppinglist = "";
+			this.update();
 		}
 	},
 	created: function()
