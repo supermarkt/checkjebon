@@ -227,15 +227,17 @@ var app = new Vue(
 				document.getElementById("shoppinglist").scrollIntoView({behavior: "smooth", block: "start"});
 			}, 100);
 		},
-		clear: function()
+		update: function()
 		{
 			this.selectSupermarket = null;
 			this.supermarkets = [];
+			localStorage.setItem("shoppinglist", this.shoppinglist);
 		}
 	},
 	created: function()
 	{
 		this.loadPrices();
+		this.shoppinglist = localStorage.getItem("shoppinglist");
 	},
 	filters:
 	{
