@@ -27,6 +27,6 @@ When scanning receipts, [Tesseract.js](https://github.com/naptha/tesseract.js/) 
 
 When entering your shopping list, you data never leaves your computer. All processing is done in the browser. Upon opening Checkjebon.nl, all available prices will be downloaded. You will see that reloading the page will not empty your shopping list; this is stored in your browser using the [localStorage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage).
 
-# Open source
+# Open data
 
-Product price data is updated frequently and may be reused.
+Product [price data](https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json?raw=true) is updated frequently and may be reused.
