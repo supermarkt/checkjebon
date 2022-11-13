@@ -54,7 +54,6 @@ var app = new Vue(
 							{
 								logger: m => 
 								{
-									console.log(m);
 									this.shoppinglist = m.status + ": " + (m.progress * 100).toFixed(0) + "%";
 								}
 							}
@@ -66,9 +65,16 @@ var app = new Vue(
 							text = text.replace(/\b([a-zA-Z]){0,3}\b/g, "");
 							// Trim results
 							text = text.split("\n").map(t => t.trim()).join("\n");
+							// Remove empty lines
+							text = text.trim().replace(/\n{2,}/g, "\n");
 							// Use fuzzy search logic to find closest match to fix typos
-							text = text.split("\n").map(t => 
+							/*
+							//var words = app.prices[2].d;
+							var words = [... new Set(app.prices.map(p => p.d).flat())];
+							//var words = [... new Set(app.prices.map(p => p.d).flat().map(p => p.n.split(" ")).flat())].filter(p => p.length > 4).map(p => {return {n: p}});
+							text = text.split("\n").map((t, i) => 
 							{
+								this.shoppinglist = "matching: " + (i / text.split("\n").length * 100).toFixed(0) + "%";
 								const options = {
 									// isCaseSensitive: false,
 									// includeScore: false,
@@ -77,7 +83,7 @@ var app = new Vue(
 									// findAllMatches: false,
 									// minMatchCharLength: 1,
 									// location: 0,
-									threshold: 0.8,
+									threshold: 0.4,
 									// distance: 100,
 									// useExtendedSearch: false,
 									// ignoreLocation: false,
@@ -87,11 +93,11 @@ var app = new Vue(
 										"n"
 									]
 								};
-								const fuse = new Fuse(app.prices[2].d, options);
+								const fuse = new Fuse(words, options);
 								var results = fuse.search(t);
 								return results[0]?.item.n;
 							}).join("\n");
-							
+							*/
 							this.shoppinglist = text;
 						})
 						
