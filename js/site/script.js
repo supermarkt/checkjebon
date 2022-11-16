@@ -60,44 +60,44 @@ var app = new Vue(
 						).then(({ data: { text } }) => 
 						{
 							// Remove all non-text characters
-							text = text.replace(/([^a-zA-Z\s])+/g, "");
+							text = text.toLowerCase().replace(/([^a-zA-Z\s])+/g, "");
 							// Remove all words that are 3 or less characters
 							text = text.replace(/\b([a-zA-Z]){0,3}\b/g, "");
 							// Trim results
 							text = text.split("\n").map(t => t.trim()).join("\n");
 							// Remove empty lines
 							text = text.trim().replace(/\n{2,}/g, "\n");
-							// Use fuzzy search logic to find closest match to fix typos
-							/*
-							//var words = app.prices[2].d;
-							var words = [... new Set(app.prices.map(p => p.d).flat())];
-							//var words = [... new Set(app.prices.map(p => p.d).flat().map(p => p.n.split(" ")).flat())].filter(p => p.length > 4).map(p => {return {n: p}});
-							text = text.split("\n").map((t, i) => 
+							// Use fuzzy search logic to find closest match in an attempt to fix reading errors
+							var words = [... new Set(app.prices.map(p => p.d).flat().map(p => p.n.toLowerCase().split(" ")).flat())].filter(p => p.length > 4);
+							var ignoredWords = ["prijs", "aantal", "e-prijs", "actieprijs", "kassa", "lade", "omschrijving", "subtotaal", "totaal"];
+							words = words.concat(ignoredWords);
+							text = text.split("\n").filter(line => line.trim() != "").map((line, i) =>
 							{
+								// Update status
 								this.shoppinglist = "matching: " + (i / text.split("\n").length * 100).toFixed(0) + "%";
-								const options = {
-									// isCaseSensitive: false,
-									// includeScore: false,
-									shouldSort: true,
-									// includeMatches: false,
-									// findAllMatches: false,
-									// minMatchCharLength: 1,
-									// location: 0,
-									threshold: 0.4,
-									// distance: 100,
-									// useExtendedSearch: false,
-									// ignoreLocation: false,
-									// ignoreFieldNorm: false,
-									// fieldNormWeight: 1,
-									keys: [
-										"n"
-									]
-								};
-								const fuse = new Fuse(words, options);
-								var results = fuse.search(t);
-								return results[0]?.item.n;
+								// Find closest match
+								return line.split(/\s/).map(word => 
+								{
+									const options = {
+										shouldSort: true,
+										threshold: 0.4,
+									};
+									// Find closest match using words that somewhat match in length
+									const fuse = new Fuse(words.filter(w => Math.abs(w.length - word.length) < 3), options);
+									var results = fuse.search(word);
+									// Exclude ignored words
+									var result = results[0]?.item || word
+									if (ignoredWords.includes(result))
+									{
+										return "";
+									}
+									// Return result
+									return result;
+								}).join(" ");								
 							}).join("\n");
-							*/
+							// Capitalize first letter of each word
+							text = text.replace(/\b[a-z]/g, letter => letter.toUpperCase());
+							// Update shoppinglist
 							this.shoppinglist = text;
 						})
 						
