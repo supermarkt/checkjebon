@@ -24,8 +24,8 @@
 					<h2 class="w3-wide w3-center caps">Checkjebon.nl</h2>
 					<p class="w3-opacity w3-center">Bekijk wat je kwijt zou zijn voor dezelfde boodschappen bij een andere supermarkt.</p>
 					<div class="w3-center">
-						<button class="w3-btn w3-ripple w3-amber" @click="scan"><i class="fa fa-camera"></i> Scan je kassabon</button>
-						<button class="w3-btn w3-ripple w3-light-gray" @click="example">Voorbeeld</button>
+						<button class="w3-btn w3-ripple w3-amber" @click="scan" :disabled="isSearching"><i class="fa fa-camera"></i> Scan je kassabon</button>
+						<button class="w3-btn w3-ripple w3-light-gray" @click="example" :disabled="isSearching">Voorbeeld</button>
 						<input type="file" id="file-selector" style="display: none;">
 					</div>
 					<p class="w3-center">
@@ -34,15 +34,15 @@
 					<div class="w3-center">
 						<label>
 							<p>Schrijf hier je boodschappenlijstje:</p>
-							<textarea class="w3-input" style="height: 300px;" v-model="shoppinglist" @input="update" placeholder="Tik hier je boodschappen in of gebruik de scan knop om je laatste kassabon te scannen.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel"></textarea>
+							<textarea class="w3-input" style="height: 300px;" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappen in of gebruik de scan knop om je laatste kassabon te scannen.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel"></textarea>
 						</label>
 					</div>
 					<p class="w3-center">
 						Op zoek naar een specifiek merk? Tik de merknaam er dan bij.
 					</p>
 					<p class="w3-center">
-						<button class="w3-btn w3-ripple w3-amber" @click="search"><i class="fa fa-search"></i> Zoek de beste prijzen</button>
-						<button class="w3-btn w3-ripple w3-light-gray" @click="clear"><i class="fa fa-clear"></i> Wissen</button>
+						<button class="w3-btn w3-ripple w3-amber" @click="search" :disabled="isSearching"><i class="fa fa-search"></i> {{ isSearching ? "Bezig met zoeken..." : "Zoek de beste prijzen" }}</button>
+						<button class="w3-btn w3-ripple w3-light-gray" @click="clear" :disabled="isSearching"><i class="fa fa-clear"></i> Wissen</button>
 					</p>
 				</div>
 			</div>

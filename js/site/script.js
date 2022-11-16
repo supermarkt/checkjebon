@@ -7,7 +7,8 @@ var app = new Vue(
 		shoppinglist: "",
 		products: [],
 		supermarkets: [],
-		selectSupermarket: null
+		selectSupermarket: null,
+		isSearching: false
 	},
 	methods:
 	{
@@ -112,6 +113,7 @@ var app = new Vue(
 		{
 			if (this.prices.length == 0)
 			{
+				this.isSearching = true;
 				setTimeout(function()
 				{
 					// Still loading prices, wait and retry
@@ -119,6 +121,7 @@ var app = new Vue(
 				}, 100);
 				return;
 			}
+			this.isSearching = false;
 			
 			// Get products from shoppinglist
 			this.products = this.shoppinglist.split("\n").filter(product => product.trim() != "").map(product => {return {name: product}})
