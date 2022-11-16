@@ -23,7 +23,7 @@ var app = new Vue(
 		},
 		example: function()
 		{
-			this.shoppinglist = "HALFV MELK\nKNOFLOOKSAUS\nSHOAMA\nMAALTIJDPITA\nKIPSCHNITZEL\nKIPFILET\nBANANEN\nVERSPAKKET TERIYAKI";
+			this.shoppinglist = "1,5 liter halfvolle melk\nKnoflooksaus\n400 g shoarma\nPita brood\nKipschnitzel\n250 gram kipfilet\nBananen\nSoep pakket";
 		},
 		scan: function()
 		{
@@ -291,22 +291,43 @@ var app = new Vue(
 	}
 });
 
-function findProducts(products, name)
+function findProducts(products, value)
 {
-	var pattern = new RegExp(name.split("").join(".*"), "i");
-	// Find all products that include letters from "name" in the same order as the appear in the original.
+	// If there is any indication of an amount, remove it from the search query.
+	var amount = getAmount(value);
+	if (amount)
+	{
+		value = value.replace(amount, "");
+	}
+	// Find all products that include all words from the search query value.
+	var patterns = value.trim().split(/\s/g).filter(p => p).map(p => new RegExp(p.replace(/\s/g, ""), "i"));
 	var productMatches = products.filter(function(product)
 	{
-		return pattern.test(product.n);
+		return patterns.every(pattern => pattern.test(product.n));
 	});
+	// Fallback: If there were no matches, find all products that include letters from "value" in the same order as the appear in the original.
+	if (productMatches.length == 0)
+	{
+		patterns = [new RegExp(value.replace(/\s/g, "").split("").join(".*"), "i")];
+		productMatches = products.filter(function(product)
+		{
+			return patterns.every(pattern => pattern.test(product.n));
+		});
+	}
+	// When an amount is specified, return the product that meets this minimum amount.	
+	if (amount)
+	{
+		var baseAmount = convertAmountToBase(amount);
+		productMatches = productMatches.filter(product => compareMinimumAmounts(convertAmountToBase(product.s), baseAmount));
+	}
 	// Order productMatches
 	productMatches.sort(function (a, b)
 	{
-		// Order by length of the match of the search string (so "skim milk" goes before "skim coffee milk")
-		var aLength = a.n.match(pattern)[0].length;
-		var bLength = b.n.match(pattern)[0].length;
-		// If lengths match, return the cheapest product
-		if (aLength == bLength)
+		// Order by length of the pattern match (so "skim milk" goes before "skim coffee milk")
+		var aLength = patterns.reduce((acc, pattern) => acc + a.n.match(pattern)[0].length, 0);
+		var bLength = patterns.reduce((acc, pattern) => acc + b.n.match(pattern)[0].length, 0);
+		// If lengths are a close enough match, return the cheapest product
+		if (Math.abs(aLength - bLength) < 3)
 		{
 			return a.p - b.p
 		}
@@ -320,37 +341,73 @@ function findProduct(products, name)
 	return findProducts(products, name)[0];
 }
 
+var unitofmeasures = 
+[
+	{ unit: "gram", name: "gram", conversion: 1 },
+	{ unit: "gram", name: "gr", conversion: 1 },
+	{ unit: "gram", name: "g", conversion: 1 },
+	{ unit: "gram", name: "kilogram", conversion: 1000 },
+	{ unit: "gram", name: "kilo", conversion: 1000 },
+	{ unit: "gram", name: "kg", conversion: 1000 },
+	{ unit: "gram", name: "k", conversion: 1000 },
+	{ unit: "gram", name: "pond", conversion: 500 },
+	{ unit: "milliliter", name: "milliliter", conversion: 1 },
+	{ unit: "milliliter", name: "mililiter", conversion: 1 },
+	{ unit: "milliliter", name: "ml", conversion: 1 },
+	{ unit: "milliliter", name: "liter", conversion: 1000 },
+	{ unit: "milliliter", name: "l", conversion: 1000 },
+	{ unit: "milliliter", name: "deciliter", conversion: 10 },
+	{ unit: "milliliter", name: "dl", conversion: 10 },
+	{ unit: "milliliter", name: "centiliter", conversion: 100 },
+	{ unit: "milliliter", name: "cl", conversion: 100 },		
+]
+
+var unitofmeasurePattern = new RegExp("([\\d\.,]+)\\s?(" + unitofmeasures.map(unit => unit.name).join("|") + ")", "i");
+
+function getAmount(value)
+{
+	var amount = value.match(unitofmeasurePattern);
+	if (amount)
+	{
+		return amount[0];
+	}
+	else
+	{
+		return null;
+	}
+}
+
 function convertAmountToBase(value)
 {
-	var unitofmeasure = 
-	[
-		{ unit: "gram", name: "g", conversion: 1 },
-		{ unit: "gram", name: "gr", conversion: 1 },
-		{ unit: "gram", name: "gram", conversion: 1 },
-		{ unit: "gram", name: "k", conversion: 1000 },
-		{ unit: "gram", name: "kg", conversion: 1000 },
-		{ unit: "gram", name: "kilo", conversion: 1000 },
-		{ unit: "gram", name: "kilogram", conversion: 1000 },
-		{ unit: "gram", name: "pond", conversion: 500 },
-		{ unit: "milliliter", name: "ml", conversion: 1 },
-		{ unit: "milliliter", name: "milliliter", conversion: 1 },
-		{ unit: "milliliter", name: "mililiter", conversion: 1 },
-		{ unit: "milliliter", name: "liter", conversion: 1000 },
-		{ unit: "milliliter", name: "l", conversion: 1000 },
-		{ unit: "milliliter", name: "deciliter", conversion: 10 },
-		{ unit: "milliliter", name: "dl", conversion: 10 },
-		{ unit: "milliliter", name: "centiliter", conversion: 100 },
-		{ unit: "milliliter", name: "cl", conversion: 100 },		
-	]
-	
-	var pattern = new RegExp("([\\d\.,]+) (" + unitofmeasure.map(unit => unit.name).join("|") + ")", "i");
-	
-	if (value && pattern.test(value))
+	if (value && unitofmeasurePattern.test(value))
 	{
-		var amount = value.match(pattern);
+		var amount = value.match(unitofmeasurePattern);
 		
-		return (amount[1].replace(",", ".") * unitofmeasure.find(unit => unit.name == amount[2].toLowerCase()).conversion) + " " + unitofmeasure.find(unit => unit.name == amount[2].toLowerCase()).unit;
+		return (amount[1].replace(",", ".") * unitofmeasures.find(unit => unit.name == amount[2].toLowerCase()).conversion) + " " + unitofmeasures.find(unit => unit.name == amount[2].toLowerCase()).unit;
 	}
 	
 	return value;
+}
+
+function compareMinimumAmounts(productAmount, searchAmount)
+{
+	var productAmountValue = parseInt(productAmount.match(/([0-9]+)/));
+	var searchAmountValue = parseInt(searchAmount.match(/([0-9]+)/));
+	var productAmountUnit = productAmount.match(/([a-z]+)/i);
+	var searchAmountUnit = searchAmount.match(/([a-z]+)/i);
+
+	if (productAmountUnit && searchAmountUnit)
+	{
+		productAmountUnit = productAmountUnit[0];
+		searchAmountUnit = searchAmountUnit[0];
+	}
+
+	if (productAmountUnit == searchAmountUnit && productAmountValue >= searchAmountValue)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
