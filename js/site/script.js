@@ -275,22 +275,27 @@ var app = new Vue(
 			}).join("\n");
 			this.saveShoppinglist();
 		},
-		share: function()
+		share: async function()
 		{
 			window.location.hash = this.shoppinglist.replace(/\n/g, "%0A");
 			var shared = false;
 			// Share the shoppinglist using the device's share functionality
 			if (navigator.share)
 			{
-				navigator.share({
-					title: "Checkjebon.nl",
-					text: "Je boodschappenlijst van Checkjebon.nl",
-					url: window.location.href
-				}).then(() => {
+				try
+				{
+					await navigator.share(
+					{
+						title: "Checkjebon.nl",
+						text: "Je boodschappenlijst van Checkjebon.nl",
+						url: window.location.href
+					});
 					shared = true;
-				}).catch((e) => {
+				}
+				catch(e)
+				{
 					console.log('Error sharing link', e);
-				});
+				}
 			}
 			// Share the shoppinglist via email
 			if (!shared)
@@ -306,7 +311,7 @@ var app = new Vue(
 				body += `%0A%0A`;
 				body += `Ga verder met deze boodschappenlijst via de link hieronder.%0A%0A`;
 				body += encodeURIComponent(window.location.href);
-				window.open(`mailto:?subject=Checkjebon.nl - boodschappenlijst&body=${body}`);
+				window.location = `mailto:?subject=Checkjebon.nl - boodschappenlijst&body=${body}`;
 			}
 			window.location.hash = "";
 		},
