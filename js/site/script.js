@@ -14,7 +14,7 @@ var app = new Vue(
 	{
 		loadPrices: function()
 		{
-			fetch("https://www.checkjebon.nl/data/supermarkets.json").then((response) =>
+			fetch("data/supermarkets.json").then((response) =>
 			{
 				return response.json();
 			}).then((prices) =>
