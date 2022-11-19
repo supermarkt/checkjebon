@@ -2,7 +2,11 @@
 
 Comparing food prices across multiple supermarkets is made a lot simpler using Checkjebon.nl. Simply scan your receipt, or enter your shopping list manually and you can instantly compare how much you would spend at each supermarket on the exact same products. You can query for generic products like "milk" or be more exact and specify the brand and amount.
 
-The project is available for use on https://www.checkjebon.nl/
+After setting up your shopping list and selecting your prefered supermarket, simply check off items as you collect them from the store.
+
+You can share your current shopping list with family members or friends at any time, or use the sharing functionality to use the shoppinglist created on your desktop or tablet to your phone as you go out to get groceries.
+
+The project is freely available for use on https://www.checkjebon.nl/
 
 # Supported supermarkets
 
@@ -29,4 +33,4 @@ When entering your shopping list, you data never leaves your computer. All proce
 
 # Open data
 
-Product [price data](https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json?raw=true) is updated frequently and may be reused.
+Product [price data](https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json?raw=true) is updated frequently and may be reused in other projects.

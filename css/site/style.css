@@ -12,3 +12,13 @@ body
 {
 	font-variant-caps: all-small-caps;
 }
+
+.strike
+{
+	text-decoration: line-through;
+}
+
+.noline
+{
+	text-decoration: none;
+}

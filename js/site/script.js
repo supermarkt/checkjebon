@@ -7,7 +7,7 @@ var app = new Vue(
 		shoppinglist: "",
 		products: [],
 		supermarkets: [],
-		selectSupermarket: null,
+		selectedSupermarket: null,
 		isSearching: false
 	},
 	methods:
@@ -25,6 +25,7 @@ var app = new Vue(
 		example: function()
 		{
 			this.shoppinglist = "1,5 liter halfvolle melk\nKnoflooksaus\n400 g shoarma\nPita brood\nKipschnitzel\n250 gram kipfilet\nBananen\nSoep pakket";
+			this.saveShoppinglist();
 		},
 		scan: function()
 		{
@@ -121,10 +122,17 @@ var app = new Vue(
 				}, 100);
 				return;
 			}
-			this.isSearching = false;
 			
 			// Get products from shoppinglist
-			this.products = this.shoppinglist.split("\n").filter(product => product.trim() != "").map(product => {return {name: product}})
+			this.products = this.shoppinglist.split("\n").filter(product => product.trim() != "").map(product => {
+				var checked = false;
+				if (product.startsWith("x "))
+				{
+					product = product.substring(2);
+					checked = true;
+				}
+				return {name: product, checked: checked};
+			});
 			this.supermarkets = this.prices;
 			
 			/* GET TOTAL PRICES PER SUPERMARKET */
@@ -179,29 +187,39 @@ var app = new Vue(
 			{
 				document.getElementById("supermarkets").scrollIntoView({behavior: "smooth", block: "start"});
 			}, 100);
+
+			this.isSearching = false;
 		},
 		select: function()
 		{
 			// Get products from shoppinglist
-			this.products = this.shoppinglist.split("\n").filter(product => product.trim() != "").map(product => {return {name: product}});
+			this.products = this.shoppinglist.split("\n").filter(product => product.trim() != "").map(product => {
+				var checked = false;
+				if (product.startsWith("x "))
+				{
+					product = product.substring(2);
+					checked = true;
+				}
+				return {name: product, originalProduct: product, checked: checked};
+			});
 			
 			// Process products for the selected supermarket and get prices
 			this.products.map(product => 
 			{
-				var existing = findProduct(this.selectSupermarket.d, product.name);
+				var existing = findProduct(this.selectedSupermarket.d, product.name);
 				
 				if (existing)
 				{
 					product.name = existing.n;
 					product.price = existing.p;
-					product.link = this.selectSupermarket.u + existing.l;
+					product.link = this.selectedSupermarket.u + existing.l;
 					product.size = convertAmountToBase(existing.s);
 				}
 				else
 				{
 					product.price = null;
 					product.link = null;
-					product.size = "Niet gevonden.";
+					product.size = "Niet gevonden";
 				}
 
 				return product;
@@ -226,7 +244,7 @@ var app = new Vue(
 				product.price = price;
 				if (product.price)
 				{
-					product.size = "Niet gevonden, geschatte prijs.";
+					product.size = "Niet gevonden, geschatte prijs";
 				}
 				return product;
 			});
@@ -236,11 +254,85 @@ var app = new Vue(
 				document.getElementById("shoppinglist").scrollIntoView({behavior: "smooth", block: "start"});
 			}, 100);
 		},
+		check: function(product, event)
+		{
+			// Process checking and unchecking of products
+			product.checked = event.target.checked;
+			this.shoppinglist = this.shoppinglist.split("\n").map(line => 
+			{
+				if (line.includes(product.originalProduct))
+				{
+					if (line.startsWith("x "))
+					{
+						line = line.substring(2);
+					}
+					if (product.checked)
+					{
+						line = "x " + line;
+					}
+				}
+				return line;
+			}).join("\n");
+			this.saveShoppinglist();
+		},
+		share: function()
+		{
+			window.location.hash = this.shoppinglist.replace(/\n/g, "%0A");
+			var shared = false;
+			// Share the shoppinglist using the device's share functionality
+			if (navigator.share)
+			{
+				navigator.share({
+					title: "Checkjebon.nl",
+					text: "Je boodschappenlijst van Checkjebon.nl",
+					url: window.location.href
+				}).then(() => {
+					shared = true;
+				}).catch((e) => {
+					console.log('Error sharing link', e);
+				});
+			}
+			// Share the shoppinglist via email
+			if (!shared)
+			{
+				var body = `Hoi, hier is je boodschappenlijst:`;
+				body += `%0A%0A`;
+				body += encodeURIComponent(this.shoppinglist.split("\n").map(p => "- " + p.trim()).filter(p => p).join("\n"));
+				if (this.selectedSupermarket)
+				{
+					body += `%0A%0A`;
+					body += `De totaalprijs bij ${this.selectedSupermarket.c} komt uit op ${this.$options.filters.formatPrice(this.selectedSupermarket.totalPrice)} euro.`;
+				}
+				body += `%0A%0A`;
+				body += `Ga verder met deze boodschappenlijst via de link hieronder.%0A%0A`;
+				body += encodeURIComponent(window.location.href);
+				window.open(`mailto:?subject=Checkjebon.nl - boodschappenlijst&body=${body}`);
+			}
+			window.location.hash = "";
+		},
+		saveShoppinglist: function()
+		{
+			localStorage.setItem("shoppinglist", this.shoppinglist);
+		},
+		loadShoppinglist: function()
+		{
+			// Populate shoppinglist from memory
+			this.shoppinglist = localStorage.getItem("shoppinglist");
+			// Override shoppinglist from URL hash, if present
+			if (window.location.hash)
+			{
+				if (!this.shoppinglist || window.confirm("Druk op OK om de lijst die je net opent te gebruiken of Annuleren om verder te gaan met de lijst die je eerder hebt gemaakt."))
+				{
+					this.shoppinglist = decodeURI(window.location.hash).substr(1);
+				}
+				window.location.hash = "";
+			}
+		},
 		update: function()
 		{
-			this.selectSupermarket = null;
+			this.selectedSupermarket = null;
 			this.supermarkets = [];
-			localStorage.setItem("shoppinglist", this.shoppinglist);
+			this.saveShoppinglist();
 		},
 		clear: function()
 		{
@@ -251,7 +343,7 @@ var app = new Vue(
 	created: function()
 	{
 		this.loadPrices();
-		this.shoppinglist = localStorage.getItem("shoppinglist");
+		this.loadShoppinglist();
 	},
 	filters:
 	{
