@@ -8,13 +8,13 @@
 		<meta name="description" content="Scan je supermarktbon om er achter te komen waar je goedkoper kunt winkelen." />
 		<link rel="stylesheet" href="/css/w3/w3.css">
 		<link rel="stylesheet" href="/css/site/style.css">
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="stylesheet" href="/css/googlefonts/lato.css">
+		<link rel="stylesheet" href="/css/fontawesome/font-awesome.min.css">
 		<!-- Vue -->
-		<script src="/js/vue/vue.js"></script>
+		<script src="/js/vue/vue.min.js"></script>
 		<!-- Text recognition -->
-		<script src="https://unpkg.com/tesseract.js@3.0.3/dist/tesseract.min.js"></script>
-		<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+		<script src="/js/tesseract/tesseract.min.js"></script>
+		<script src="/js/fuse/fuse.js"></script>
 	</head>
 	<body class="w3-gray">
 		<div class="w3-content" style="max-width: 2000px; padding-top: 0px;" id="checkjebon">
@@ -22,7 +22,7 @@
 			<div class="w3-blue-grey">
 				<div class="w3-container w3-content w3-padding-64" style="max-width:800px">
 					<h2 class="w3-wide w3-center caps">Checkjebon.nl</h2>
-					<p class="w3-opacity w3-center">Bekijk wat je kwijt zou zijn voor dezelfde boodschappen bij een andere supermarkt.</p>
+					<p class="w3-opacity w3-center">Bekijk wat je kwijt zou zijn voor dezelfde boodschappen bij een andere supermarkt en bespaar elke keer dat je naar de winkel gaat.</p>
 					<div class="w3-center">
 						<button class="w3-btn w3-ripple w3-amber" @click="scan" :disabled="isSearching"><i class="fa fa-camera"></i> Scan je kassabon</button>
 						<button class="w3-btn w3-ripple w3-light-gray" @click="example" :disabled="isSearching">Voorbeeld</button>
@@ -126,7 +126,7 @@
 			<div class="w3-light-gray">
 				<div class="w3-container w3-content w3-padding-64" style="max-width: 800px">
 					<h2 class="w3-wide w3-center caps">Over Checkjebon.nl</h2>
-					<p class="w3-opacity w3-center">Prijzen in supermarkten veranderen regelmatig, Checkjebon.nl werkt ze wekelijks bij en vertelt je waar je het goedkoopst uit bent voor je boodschappen. Verder is Checkjebon.nl een <a href="https://www.github.com/supermarkt/checkjebon/">open source project</a> en ook de gebruikte supermarktdata is gratis te gebruiken.</p>
+					<p class="w3-opacity w3-center">Prijzen in supermarkten veranderen regelmatig, Checkjebon.nl werkt ze <abbr :title="'Laatst bijgewerkt op ' + pricesLastUpdated">dagelijks</abbr> bij en vertelt je waar je het goedkoopst uit bent voor je boodschappen. Verder is Checkjebon.nl een <a href="https://www.github.com/supermarkt/checkjebon/" target="_new">open source project</a> en ook de gebruikte <a href="https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json" target="_new">supermarktdata</a> is gratis te gebruiken. Neem <a href="mailto:info@checkjebon.nl">contact op</a> voor vragen of suggesties.</p>
 				</div>
 			</div>
 		</div>

@@ -4,6 +4,7 @@ var app = new Vue(
 	data:
 	{
 		prices: [],
+		pricesLastUpdated: null,
 		shoppinglist: "",
 		products: [],
 		supermarkets: [],
@@ -16,6 +17,7 @@ var app = new Vue(
 		{
 			fetch("data/supermarkets.json").then((response) =>
 			{
+				this.pricesLastUpdated = new Date(response.headers.get("Last-Modified")).toLocaleString();
 				return response.json();
 			}).then((prices) =>
 			{
@@ -24,7 +26,7 @@ var app = new Vue(
 		},
 		example: function()
 		{
-			this.shoppinglist = "1,5 liter halfvolle melk\nKnoflooksaus\n400 g shoarma\nPita brood\nKipschnitzel\n250 gram kipfilet\nBananen\nSoep pakket";
+			this.shoppinglist = "1,5 liter halfvolle melk\nKnoflooksaus\n400 g shoarma\nPita brood\nKipschnitzel\n250 gram kipfilet\n1 kilo bananen\nSoep pakket";
 			this.saveShoppinglist();
 		},
 		scan: function()
