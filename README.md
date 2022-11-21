@@ -10,18 +10,26 @@ The project is freely available for use on https://www.checkjebon.nl/
 
 # Supported supermarkets
 
-Checkjebon.nl is aimed at the Dutch market, and currently provides accurate prices for:
+Checkjebon.nl is aimed at the Dutch market, and currently aims to provide accurate and recent prices for:
 
 * [AH](https://www.ah.nl/)
 * [ALDI](https://www.aldi.nl/) - Note; limited assortment due to not all products being available online.
 * [Coop](https://www.coop.nl/)
 * [DekaMarkt](https://www.dekamarkt.nl/) - Note; limited assortment due to not all products being available online.
 * [Dirk](https://www.dirk.nl/)
+* [Hoogvliet](https://www.hoogvliet.com/)
 * [Jumbo](https://www.jumbo.com/)
 * [Plus](https://www.plus.nl/)
 * [SPAR](https://www.spar.nl/)
+* [Vomar](https://www.vomar.nl/)
 
-When no prices are found for a specific product for any of the given supermarkets, an price estimate is used based on the most expensive price for that product among other supermarkets.
+# Product selection algorithm
+
+For any product added to the shopping list, Checkjebon.nl tries to take a best guess at what you actually meant. Sometimes this may result in not seeing what you expect, simply because other products come up cheaper. In general, first an exact match by name is attempted. If there was no exact match, a fuzzy search will be applied, compiling a list of all products that contain the words from the shopping list item. The fuzzy search finds products based on if they contain all the letters from your shopping list item in the same order as they are given, but not necessarily right next to each other. For example, "milk" will find "skiM mILK" as well as "whole MILK". When an amount in liter or kilogram is given, all products below the given amount are filtered out unless this returns zero results, in which case the filter is undone. Finally, products are first ordered by the string length of the fuzzy search (so "whole MILK"=>4 goes before "skiM mILK"=>6) in an attempt to find the closed possible match, those results are then ordered by price, and finally the top item from that list is returned. 
+
+The algorithm works better when supplying exactly what you are looking for. Note that generic names like "milk" are not well suited for this even though in in day to day live that would be enough to write down since you will make the choice between "skim milk" or "whole milk" once you get to the cooling compartment. The same goes for products like "butter" ("salted butter", "wipped butter", "cream butter", etc).
+
+When no prices are found for a specific product for any of the given supermarkets, a price estimate is used based on the most expensive price for that product among other supermarkets.
 
 # Receipt scanning
 
