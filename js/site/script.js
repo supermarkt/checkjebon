@@ -26,7 +26,7 @@ var app = new Vue(
 		},
 		example: function()
 		{
-			this.shoppinglist = "1,5 liter halfvolle melk\nKnoflooksaus\n400 g shoarma\nPita brood\nKipschnitzel\n250 gram kipfilet\n1 kilo bananen\nSoep pakket";
+			this.shoppinglist = "1,5 liter halfvolle melk\nKnoflooksaus\n400 g shoarma\nPita brood\nKipschnitzel\n250 gram kipfilet\n1 kilo bananen\n1 liter coca cola\nkokosbrood\n500 ml soep\nhalvarine\n";
 			this.saveShoppinglist();
 		},
 		scan: function()
@@ -458,10 +458,10 @@ var unitofmeasures =
 	{ unit: "milliliter", name: "ml", conversion: 1 },
 	{ unit: "milliliter", name: "liter", conversion: 1000 },
 	{ unit: "milliliter", name: "l", conversion: 1000 },
-	{ unit: "milliliter", name: "deciliter", conversion: 10 },
-	{ unit: "milliliter", name: "dl", conversion: 10 },
-	{ unit: "milliliter", name: "centiliter", conversion: 100 },
-	{ unit: "milliliter", name: "cl", conversion: 100 },		
+	{ unit: "milliliter", name: "deciliter", conversion: 100 },
+	{ unit: "milliliter", name: "dl", conversion: 100 },
+	{ unit: "milliliter", name: "centiliter", conversion: 10 },
+	{ unit: "milliliter", name: "cl", conversion: 10 },		
 ]
 
 var unitofmeasurePattern = new RegExp("([\\d\.,]+)\\s?(" + unitofmeasures.map(unit => unit.name).join("|") + ")", "i");
