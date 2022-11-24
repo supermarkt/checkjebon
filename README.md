@@ -2,15 +2,15 @@
 
 Comparing food prices across multiple supermarkets is made a lot simpler using Checkjebon.nl. Simply scan your receipt, or enter your shopping list manually and you can instantly compare how much you would spend at each supermarket on the exact same products. You can query for generic products like "milk" or be more exact and specify the brand and amount.
 
-[!Shopping list editor](/images/screenshot1.png)
+<img src="/images/screenshot1.png" width="300" title="Shopping list editor">
 
 This will bring up the amount due per supermarket for the shopping list.
 
-[!Prices per supermarket](/images/screenshot2.png)
+<img src="/images/screenshot2.png" width="300" title="Prices per supermarket">
 
 After setting up your shopping list and selecting your preferred supermarket, simply check off items as you collect them from the store.
 
-[!Shopping list](/images/screenshot3.png)
+<img src="/images/screenshot3.png" width="300" title="Shopping list">
 
 You can share your current shopping list with family members or friends at any time, or use the sharing functionality to use the shopping list created on your desktop or tablet to your phone as you go out to get groceries.
 
