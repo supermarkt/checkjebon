@@ -79,7 +79,7 @@
 						</li>
 					</ul>
 					<p class="w3-center">
-						Waarom sommige <a href="https://github.com/supermarkt/checkjebon" target="_blank">supermarkten ontbreken</a>.
+						Waarom sommige <a href="#" onclick="alert('Een aantal grote supermarktketens zoals LIDL, Nettorama, Boni maar ook online bezorgservices zoals Picnic en Crisp hebben geen prijzen op hun website staan. Hierdoor kunnen ze ook niet meegenomen worden in de prijsvergelijking van Checkjebon.nl.'); return false;" target="_blank">supermarkten ontbreken</a>.
 					</p>
 				</div>
 			</div>
@@ -104,6 +104,7 @@
 											</a>
 										</span><br>
 										<span class="w3-text-blue-gray">
+											<i class="fa fa-pencil" style="cursor: pointer;" @click="edit(product, $event)"></i>
 											{{ product.size | formatAmount }}
 										</span>
 									</td>

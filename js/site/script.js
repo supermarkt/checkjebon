@@ -277,6 +277,23 @@ var app = new Vue(
 			}).join("\n");
 			this.saveShoppinglist();
 		},
+		edit: function(product, event)
+		{
+			var newProduct = window.prompt(`Bedoelde je soms iets anders? Pas dan de naam van dit product aan.\n\nTip: Hoe specifiek je bent, hoe beter het resultaat. Gebruik bijvoorbeeld "smeerboter" in plaats van "boter" of "1,5 liter halfvolle melk" in plaats van alleen "melk".`, product.originalProduct);
+			if (newProduct)
+			{
+				this.shoppinglist = this.shoppinglist.split("\n").map(line => 
+				{
+					if (line.includes(product.originalProduct))
+					{
+						line = newProduct;
+					}
+					return line;
+				}).join("\n");
+				this.saveShoppinglist();
+				this.select();
+			}
+		},
 		share: async function()
 		{
 			window.location.hash = this.shoppinglist.replace(/\n/g, "%0A");
