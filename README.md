@@ -26,6 +26,7 @@ Checkjebon.nl is aimed at the Dutch market, and currently aims to provide accura
 * [DekaMarkt](https://www.dekamarkt.nl/) - Note; limited assortment due to not all products being available online.
 * [Dirk](https://www.dirk.nl/)
 * [Hoogvliet](https://www.hoogvliet.com/)
+* [Jan Linders](https://www.janlinders.nl/)
 * [Jumbo](https://www.jumbo.com/)
 * [Plus](https://www.plus.nl/)
 * [SPAR](https://www.spar.nl/)
@@ -41,7 +42,6 @@ Some supermarkets do not provide prices for their products online or are not yet
 * [EkoPlaza](https://www.ekoplaza.nl/) - Not yet indexed.
 * [Flink](https://www.goflink.com/) -  Not yet indexed.
 * [GORILLAS](https://gorillas.io/nl) - No online assortment without an account.
-* [Jan Linders](https://www.janlinders.nl/) -  Not yet indexed.
 * [Marqt](https://www.marqt.nl/) - No online assortment.
 * [LIDL](https://www.lidl.nl/) - No online assortment.
 * [Nettorama](https://www.nettorama.nl/) - No online assortment.
