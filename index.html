@@ -66,7 +66,7 @@
 											{{supermarket.c}}
 										</span><br>
 										<span class="w3-text-blue-gray">
-											{{supermarket.d.length}} producten
+											{{supermarket.d.length | formatCount}} producten
 											<span v-if="supermarket.notFound > 0"> - Let op, {{supermarket.notFound}} product{{supermarket.notFound==1?"":"en"}} niet gevonden.</span>
 										</span>
 									</td>
@@ -79,7 +79,7 @@
 						</li>
 					</ul>
 					<p class="w3-center">
-						Waarom sommige <a href="#" onclick="alert('Een aantal grote supermarktketens zoals LIDL, Nettorama, Boni maar ook online bezorgservices zoals Picnic en Crisp hebben geen prijzen op hun website staan. Hierdoor kunnen ze ook niet meegenomen worden in de prijsvergelijking van Checkjebon.nl.'); return false;" target="_blank">supermarkten ontbreken</a>.
+						Waarom sommige <a href="#" onclick="alert('Een aantal grote supermarktketens zoals LIDL, Nettorama, Boni maar ook online bezorgservices zoals GORILLAS en Crisp hebben geen prijzen op hun website staan. Hierdoor kunnen ze ook niet meegenomen worden in de prijsvergelijking van Checkjebon.nl.'); return false;" target="_blank">supermarkten ontbreken</a>.
 					</p>
 				</div>
 			</div>
@@ -129,7 +129,7 @@
 			<div class="w3-light-gray">
 				<div class="w3-container w3-content w3-padding-64" style="max-width: 800px">
 					<h2 class="w3-wide w3-center caps">Over Checkjebon.nl</h2>
-					<p class="w3-opacity w3-center">Prijzen in supermarkten veranderen regelmatig, Checkjebon.nl werkt ze <abbr :title="'Laatst bijgewerkt op ' + pricesLastUpdated">dagelijks</abbr> bij en vertelt je waar je het goedkoopst uit bent voor je boodschappen. Verder is Checkjebon.nl een <a href="https://www.github.com/supermarkt/checkjebon/" target="_new">open source project</a> en ook de gebruikte <a href="https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json" target="_new">supermarktdata</a> is gratis te gebruiken. Neem <a href="mailto:info@checkjebon.nl">contact op</a> voor vragen of suggesties.</p>
+					<p class="w3-opacity w3-center">Prijzen in supermarkten veranderen regelmatig, Checkjebon.nl werkt ze <abbr :title="'Laatst bijgewerkt op ' + pricesLastUpdated">dagelijks</abbr> bij en vertelt je waar je het goedkoopst uit bent voor je boodschappen. Verder is Checkjebon.nl een <a href="https://www.github.com/supermarkt/checkjebon/" target="_blank">open source project</a> en ook de gebruikte <a href="https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json" target="_blank">supermarktdata</a> is gratis te hergebruiken in andere projecten. Neem <a href="mailto:info@checkjebon.nl">contact op</a> voor vragen of suggesties.</p>
 				</div>
 			</div>
 		</div>

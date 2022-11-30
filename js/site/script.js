@@ -406,7 +406,12 @@ var app = new Vue(
 			{
 				return value?.toLowerCase();
 			}
-		}
+		},
+		formatCount: function(value)
+		{
+			// Add thousand separator
+			return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+		},
 	}
 });
 
