@@ -43,10 +43,13 @@ Some supermarkets do not provide prices for their products online or are not yet
 * [EkoPlaza](https://www.ekoplaza.nl/) - Not yet indexed.
 * [Flink](https://www.goflink.com/) -  Not yet indexed.
 * [GORILLAS](https://gorillas.io/nl) - No online assortment without an account.
+* [Hanos](https://hanos.nl/) - No online assortment without an account.
+* [Makro](https://www.makro.nl/) - Not yet indexed.
 * [Marqt](https://www.marqt.nl/) - No online assortment.
 * [LIDL](https://www.lidl.nl/) - No online assortment.
 * [Nettorama](https://www.nettorama.nl/) - No online assortment.
 * [Odin](https://www.odin.nl/) -  Not yet indexed.
+* [Poiesz](https://www.poiesz-supermarkten.nl/) - Not yet indexed.
 * [Sligro](https://www.sligro.nl/) - No online assortment without an account.
 
 # Product selection algorithm
@@ -55,7 +58,7 @@ For any product added to the shopping list, Checkjebon.nl tries to take a best g
 
 The algorithm works better when supplying exactly what you are looking for. Note that generic names like `milk` are not well suited for this even though in in day to day live that would be enough to write down since you will make the choice between `skim milk` or `whole milk` once you get to the cooling compartment. The same goes for products like `butter` (`salted butter`, `whipped butter`, `cream butter`, etc).
 
-When no prices are found for a specific product for any of the given supermarkets, a price estimate is used based on the most expensive price for that product among other supermarkets.
+When no prices are found for a specific product for any of the given supermarkets, a price estimate is used based on the average price for that product among other supermarkets.
 
 # Receipt scanning
 

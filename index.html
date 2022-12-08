@@ -66,8 +66,10 @@
 											{{supermarket.c}}
 										</span><br>
 										<span class="w3-text-blue-gray">
+											<span v-if="supermarket.notFound > 0">
+												<i class="fa fa-info-circle"></i> {{supermarket.notFound}} product{{supermarket.notFound==1?"":"en"}} niet gevonden in
+											</span>
 											{{supermarket.d.length | formatCount}} producten
-											<span v-if="supermarket.notFound > 0"> - Let op, {{supermarket.notFound}} product{{supermarket.notFound==1?"":"en"}} niet gevonden.</span>
 										</span>
 									</td>
 									<td class="w3-xlarge w3-right-align" style="width: 80px;">
@@ -79,7 +81,7 @@
 						</li>
 					</ul>
 					<p class="w3-center">
-						Waarom sommige <a href="#" onclick="alert('Een aantal grote supermarktketens zoals LIDL, Nettorama, Boni maar ook online bezorgservices zoals GORILLAS en Crisp hebben geen prijzen op hun website staan. Hierdoor kunnen ze ook niet meegenomen worden in de prijsvergelijking van Checkjebon.nl.'); return false;" target="_blank">supermarkten ontbreken</a>.
+						Waarom sommige <a href="#" onclick="alert('Een aantal grote supermarktketens zoals LIDL, Nettorama, Boni maar ook online bezorgservices zoals GORILLAS en Crisp hebben geen prijzen op hun website staan. Hierdoor kunnen ze ook niet meegenomen worden in de prijsvergelijking van Checkjebon.nl.'); return false;" target="_blank">supermarkten ontbreken</a>, zoals LIDL, Nettorama, Boni, etc.
 					</p>
 				</div>
 			</div>
@@ -104,8 +106,18 @@
 											</a>
 										</span><br>
 										<span class="w3-text-blue-gray">
-											<i class="fa fa-pencil" style="cursor: pointer;" @click="edit(product, $event)"></i>
-											{{ product.size | formatAmount }}
+											<span v-if="product.size">
+												<i class="fa fa-pencil" style="cursor: pointer;" @click="edit(product, $event, 'Bedoelde je soms iets anders? Pas dan de naam van dit product aan.\n\nTip: Hoe specifieker je bent, hoe beter het resultaat. Gebruik bijvoorbeeld &quot;smeerboter&quot; in plaats van &quot;boter&quot; of &quot;1,5 liter halfvolle melk&quot; in plaats van alleen &quot;melk&quot;.')"></i>
+												{{ product.size | formatAmount }}
+											</span>
+											<span v-if="product.priceNotFound && !product.priceIsEstimate">
+												<i class="fa fa-exclamation-triangle" style="cursor: pointer;" @click="edit(product, $event, 'Dit product kon bij geen enkele supermarket gevonden worden.\n\nPas de naam of hoeveelheid aan op je boodschappenlijst en probeer het opnieuw.')"></i>
+												Niet gevonden
+											</span>
+											<span v-if="product.priceNotFound && product.priceIsEstimate">
+												Niet gevonden, geschatte prijs
+												<i class="fa fa-question-circle" style="cursor: pointer;" @click="edit(product, $event, 'Het lijkt er op dat deze supermarkt dit product niet onder deze naam op hun website heeft staan. Om toch goed je boodschappenlijstje te kunnen vergelijken, is uitgegaan van de gemiddelde prijs van dit product bij andere winkels.\n\nOm het product toch te kunnen vinden, pas de naam of hoeveelheid aan om iets minder specifiek te zoeken.')"></i>
+											</span>
 										</span>
 									</td>
 									<td class="w3-xlarge w3-right-align" style="width: 80px;">

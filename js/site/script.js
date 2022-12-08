@@ -157,7 +157,7 @@ var app = new Vue(
 				});
 			});
 			
-			// For products without a price, find the highest price among other supermarkets to get an approximation. 
+			// For products without a price, find the average price among other supermarkets to get an approximation. 
 			this.supermarkets.map(supermarket =>
 			{
 				this.products.map(product =>
@@ -167,17 +167,16 @@ var app = new Vue(
 					if (!existing)
 					{
 						var price = 0;
+						var count = 0;
 						this.supermarkets.map(supermarket => {
 							var existingForOtherSupermarket = findProduct(supermarket.d, product.name);
 							if (existingForOtherSupermarket)
 							{
-								if (existingForOtherSupermarket.p > price)
-								{
-									price = existingForOtherSupermarket.p;
-								}
+								price += existingForOtherSupermarket.p;
+								count++;
 							}
 						})
-						supermarket.totalPrice += price;
+						supermarket.totalPrice += (count > 0 ? (price / count) : 0);
 					}
 					
 				});
@@ -221,32 +220,31 @@ var app = new Vue(
 				{
 					product.price = null;
 					product.link = null;
-					product.size = "Niet gevonden";
+					product.priceNotFound = true;
 				}
 
 				return product;
 			});
 			
-			// For products without a price, find the highest price among other supermarkets to get an approximation. 
+			// For products without a price, find the average price among other supermarkets to get an approximation. 
 			this.products.filter(product => !product.price && !product.link).map(product =>
 			{
 				var price = 0;
+				var count = 0;
 			
 				this.supermarkets.map(supermarket => {
 					var existing = findProduct(supermarket.d, product.name);
 					if (existing)
 					{
-						if (existing.p > price)
-						{
-							price = existing.p;
-						}
+						price += existing.p;
+						count++;
 					}
 				})
 				
-				product.price = price;
+				product.price = (count > 0 ? (price / count) : 0);
 				if (product.price)
 				{
-					product.size = "Niet gevonden, geschatte prijs";
+					product.priceIsEstimate = true;
 				}
 				return product;
 			});
@@ -277,9 +275,9 @@ var app = new Vue(
 			}).join("\n");
 			this.saveShoppinglist();
 		},
-		edit: function(product, event)
+		edit: function(product, event, message)
 		{
-			var newProduct = window.prompt(`Bedoelde je soms iets anders? Pas dan de naam van dit product aan.\n\nTip: Hoe specifiek je bent, hoe beter het resultaat. Gebruik bijvoorbeeld "smeerboter" in plaats van "boter" of "1,5 liter halfvolle melk" in plaats van alleen "melk".`, product.originalProduct);
+			var newProduct = window.prompt(message, product.originalProduct);
 			if (newProduct)
 			{
 				this.shoppinglist = this.shoppinglist.split("\n").map(line => 
