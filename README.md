@@ -67,4 +67,4 @@ When entering your shopping list, you data never leaves your computer. All proce
 
 # Open data
 
-Product [price data](https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json?raw=true) is updated frequently and may be reused in other projects.
+Product [price data](https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json?raw=true) is updated frequently and may be reused in other projects. For example, you can get a price alert when a product you don't buy often is discounted, such as cleaning supplies or personal care products, or more expensive products with long expiration dates such as (soft) drinks or bake-off pizzas. Data journalists may use the data to see trends or verify claims from supermarkets.
