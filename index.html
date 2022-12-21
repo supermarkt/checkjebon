@@ -24,8 +24,8 @@
 					<h2 class="w3-wide w3-center caps">Checkjebon.nl</h2>
 					<p class="w3-opacity w3-center">Bekijk wat je kwijt zou zijn voor dezelfde boodschappen bij een andere supermarkt en bespaar elke keer dat je naar de winkel gaat.</p>
 					<div class="w3-center">
-						<button class="w3-btn w3-ripple w3-amber" @click="scan" :disabled="isSearching"><i class="fa fa-camera"></i> Scan je kassabon</button>
-						<button class="w3-btn w3-ripple w3-light-gray" @click="example" :disabled="isSearching">Voorbeeld</button>
+						<button class="w3-btn w3-ripple w3-amber" @click="scan" :disabled="isSearching" title="Scan je kassabon"><i class="fa fa-camera"></i> Scan je kassabon</button>
+						<button class="w3-btn w3-ripple w3-light-gray" @click="example" :disabled="isSearching" title="Voorbeeld">Voorbeeld</button>
 						<input type="file" id="file-selector" style="display: none;">
 					</div>
 					<p class="w3-center">
@@ -34,16 +34,16 @@
 					<div class="w3-center">
 						<label>
 							<p>Schrijf hier je boodschappenlijstje:</p>
-							<textarea class="w3-input" style="height: 300px;" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappen in of gebruik de scan knop om je laatste kassabon te scannen.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel"></textarea>
+							<textarea class="w3-input" style="height: 300px;" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappen in of gebruik de scan knop om je laatste kassabon te scannen.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel" title="Vul hier je boodschappenlijst in"></textarea>
 						</label>
 					</div>
 					<p class="w3-center">
 						Op zoek naar een specifiek merk? Tik de merknaam er dan bij.
 					</p>
 					<p class="w3-center">
-						<button class="w3-btn w3-ripple w3-amber" @click="search" :disabled="isSearching"><i class="fa fa-search"></i> {{ isSearching ? "Bezig met zoeken..." : "Vergelijk prijzen" }}</button>
-						<button class="w3-btn w3-ripple w3-light-gray" @click="share" :disabled="isSearching"><i class="fa fa-share-alt"></i> Delen</button>
-						<button class="w3-btn w3-ripple w3-light-gray" @click="clear" :disabled="isSearching"><i class="fa fa-trash"></i></button>
+						<button class="w3-btn w3-ripple w3-amber" @click="search" :disabled="isSearching" title="Vergelijk prijzen"><i class="fa fa-search"></i> {{ isSearching ? "Bezig met zoeken..." : "Vergelijk prijzen" }}</button>
+						<button class="w3-btn w3-ripple w3-light-gray" @click="share" :disabled="isSearching" title="Delen"><i class="fa fa-share-alt"></i> Delen</button>
+						<button class="w3-btn w3-ripple w3-light-gray" @click="clear" :disabled="isSearching" title="Wissen"><i class="fa fa-trash"></i></button>
 					</p>
 				</div>
 			</div>
@@ -59,12 +59,13 @@
 							<table style="width: 100%;">
 								<tr :class="{'w3-hover-amber': supermarket.n == selectedSupermarket?.n}">
 									<td style="width: 80px">
-										<img v-bind:src="supermarket.i" class="w3-circle" style="width: 60px">
+										<img v-bind:src="supermarket.i" class="w3-circle" style="width: 60px" :title="'Logo ' + supermarket.c">
 									</td>
 									<td>
-										<span class="w3-large">
+										<a href="#" class="w3-large noline" onclick="return false;" :title="supermarket.c + ': ' + $options.filters.formatPrice(supermarket.totalPrice) + ' euro'">
 											{{supermarket.c}}
-										</span><br>
+										</a>
+										<br>
 										<span class="w3-text-blue-gray">
 											<span v-if="supermarket.notFound > 0">
 												<i class="fa fa-info-circle"></i> {{supermarket.notFound}} product{{supermarket.notFound==1?"":"en"}} niet gevonden in
@@ -101,27 +102,27 @@
 									</td>
 									<td>
 										<span class="w3-large">
-											<a v-bind:href="product.link" :title="product.originalProduct" target="_blank" class="noline">
+											<a v-bind:href="product.link" target="_blank" class="noline" :title="product.name + ': ' + $options.filters.formatPrice(product.price)">
 												{{ product.name }}
 											</a>
 										</span><br>
 										<span class="w3-text-blue-gray">
 											<span v-if="product.size">
-												<i class="fa fa-pencil" style="cursor: pointer;" @click="edit(product, $event, 'Bedoelde je soms iets anders? Pas dan de naam van dit product aan.\n\nTip: Hoe specifieker je bent, hoe beter het resultaat. Gebruik bijvoorbeeld &quot;smeerboter&quot; in plaats van &quot;boter&quot; of &quot;1,5 liter halfvolle melk&quot; in plaats van alleen &quot;melk&quot;.')"></i>
+												<i class="fa fa-pencil" style="cursor: pointer;" @click="edit(product, $event, 'Bedoelde je soms iets anders? Pas dan de naam van dit product aan.\n\nTip: Hoe specifieker je bent, hoe beter het resultaat. Gebruik bijvoorbeeld &quot;smeerboter&quot; in plaats van &quot;boter&quot; of &quot;1,5 liter halfvolle melk&quot; in plaats van alleen &quot;melk&quot;.')" title="Product aanpassen"></i>
 												{{ product.size | formatAmount }}
 											</span>
 											<span v-if="product.priceNotFound && !product.priceIsEstimate">
-												<i class="fa fa-exclamation-triangle" style="cursor: pointer;" @click="edit(product, $event, 'Dit product kon bij geen enkele supermarket gevonden worden.\n\nPas de naam of hoeveelheid aan op je boodschappenlijst en probeer het opnieuw.')"></i>
+												<i class="fa fa-exclamation-triangle" style="cursor: pointer;" @click="edit(product, $event, 'Dit product kon bij geen enkele supermarket gevonden worden.\n\nPas de naam of hoeveelheid aan op je boodschappenlijst en probeer het opnieuw.')" title="Product aanpassen"></i>
 												Niet gevonden
 											</span>
 											<span v-if="product.priceNotFound && product.priceIsEstimate">
 												Niet gevonden, geschatte prijs
-												<i class="fa fa-question-circle" style="cursor: pointer;" @click="edit(product, $event, 'Het lijkt er op dat deze supermarkt dit product niet onder deze naam op hun website heeft staan. Om toch goed je boodschappenlijstje te kunnen vergelijken, is uitgegaan van de gemiddelde prijs van dit product bij andere winkels.\n\nOm het product toch te kunnen vinden, pas de naam of hoeveelheid aan om iets minder specifiek te zoeken.')"></i>
+												<i class="fa fa-question-circle" style="cursor: pointer;" @click="edit(product, $event, 'Het lijkt er op dat deze supermarkt dit product niet onder deze naam op hun website heeft staan. Om toch goed je boodschappenlijstje te kunnen vergelijken, is uitgegaan van de gemiddelde prijs van dit product bij andere winkels.\n\nOm het product toch te kunnen vinden, pas de naam of hoeveelheid aan om iets minder specifiek te zoeken.')" title="Product aanpassen"></i>
 											</span>
 										</span>
 									</td>
 									<td class="w3-xlarge w3-right-align" style="width: 80px;">
-										<a v-bind:href="product.link" target="_blank" class="noline">
+										<a v-bind:href="product.link" target="_blank" class="noline" :title="product.name + ': ' + $options.filters.formatPrice(product.price)">
 											{{ !product.link && product.price ? "~" : "" }}{{ product.price | formatPrice }}
 										</a>
 									</td>
@@ -132,7 +133,7 @@
 					</ul>
 					
 					<p class="w3-center">
-						<button class="w3-btn w3-ripple w3-amber" @click="share"><i class="fa fa-share-alt"></i> Deel je boodschappenlijst</button>
+						<button class="w3-btn w3-ripple w3-amber" @click="share" title="Deel je boodschappenlijst"><i class="fa fa-share-alt"></i> Deel je boodschappenlijst</button>
 					</p>
 
 				</div>
