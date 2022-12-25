@@ -58,12 +58,12 @@
 			</div>
 
 			<div class="w3-light-gray" id="supermarkets" v-show="supermarkets.length > 0">
-				<div class="w3-container w3-content w3-padding-64" style="max-width: 800px">
+				<div class="w3-container w3-content w3-padding-64 " style="max-width: 800px">
 				
 					<h2 class="w3-wide w3-center caps">Totaalprijs</h2>
 					
-					<ul class="w3-ul w3-card-4 w3-light-gray w3-hoverable">
-						<li class="w3-bar" :class="{'w3-amber': supermarket.n == selectedSupermarket?.n}" v-for="supermarket in supermarkets" :key="supermarket.n" @click="selectedSupermarket=supermarket; select()">
+					<ul class="w3-ul w3-card-4 w3-light-gray w3-hoverable w3-round-large">
+						<li class="w3-bar w3-round-large" :class="{'w3-amber': supermarket.n == selectedSupermarket?.n}" v-for="supermarket in supermarkets" :key="supermarket.n" @click="selectedSupermarket=supermarket; select()">
 
 							<table style="width: 100%;">
 								<tr :class="{'w3-hover-amber': supermarket.n == selectedSupermarket?.n}">
