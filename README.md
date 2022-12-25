@@ -1,3 +1,6 @@
+See my version made here: https://cjb.justinnn.dev/
+Keep in mind these are always up-to date with my latest commits:
+
 # Checkjebon.nl
 
 Comparing food prices across multiple supermarkets is made a lot simpler using Checkjebon.nl. Simply scan your receipt, or enter your shopping list manually and you can instantly compare how much you would spend at each supermarket on the exact same products. You can query for generic products like `milk` or be more exact and specify the brand and amount.
