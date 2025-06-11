@@ -4,8 +4,17 @@
 		<title>Checkjebon.nl - Goedkopere boodschappen</title>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="title" content="Checkjebon.nl - Goedkopere boodschappen">
+		<meta name="description" content="Scan je supermarktbon om er achter te komen waar je goedkoper kunt winkelen.">
+		<meta property="og:type" content="website">
+		<meta property="og:url" content="https://www.checkjebon.nl/">
+		<meta property="og:title" content="Checkjebon.nl - Goedkopere boodschappen">
+		<meta property="og:description" content="Scan je supermarktbon om er achter te komen waar je goedkoper kunt winkelen.">
+		<meta property="twitter:card" content="summary_large_image">
+		<meta property="twitter:url" content="https://www.checkjebon.nl/">
+		<meta property="twitter:title" content="Checkjebon.nl - Goedkopere boodschappen">
+		<meta property="twitter:description" content="Scan je supermarktbon om er achter te komen waar je goedkoper kunt winkelen.">
 		<link rel="icon" href="/favicon.ico" type="image/x-icon">
-		<meta name="description" content="Scan je supermarktbon om er achter te komen waar je goedkoper kunt winkelen." />
 		<link rel="stylesheet" href="/css/w3/w3.css">
 		<link rel="stylesheet" href="/css/site/style.css">
 		<link rel="stylesheet" href="/css/googlefonts/lato.css">
@@ -24,8 +33,8 @@
 					<h2 class="w3-wide w3-center caps">Checkjebon.nl</h2>
 					<p class="w3-opacity w3-center">Bekijk wat je kwijt zou zijn voor dezelfde boodschappen bij een andere supermarkt en bespaar elke keer dat je naar de winkel gaat.</p>
 					<div class="w3-center">
-						<button class="w3-btn w3-ripple w3-amber" @click="scan" :disabled="isSearching" title="Scan je kassabon"><i class="fa fa-camera"></i> Scan je kassabon</button>
-						<button class="w3-btn w3-ripple w3-light-gray" @click="example" :disabled="isSearching" title="Voorbeeld">Voorbeeld</button>
+						<button class="w3-btn w3-ripple w3-round-large w3-amber" @click="scan" :disabled="isSearching" title="Scan je kassabon"><i class="fa fa-camera"></i> Scan je kassabon</button>
+						<button class="w3-btn w3-ripple w3-round-large w3-light-gray" @click="example" :disabled="isSearching" title="Voorbeeld">Voorbeeld</button>
 						<input type="file" id="file-selector" style="display: none;">
 					</div>
 					<p class="w3-center">
@@ -34,27 +43,27 @@
 					<div class="w3-center">
 						<label>
 							<p>Schrijf hier je boodschappenlijstje:</p>
-							<textarea class="w3-input" style="height: 300px;" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappen in of gebruik de scan knop om je laatste kassabon te scannen.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel" title="Vul hier je boodschappenlijst in"></textarea>
+							<textarea class="w3-input w3-round-large" style="height: 300px;" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappen in of gebruik de scan knop om je laatste kassabon te scannen.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel" title="Vul hier je boodschappenlijst in"></textarea>
 						</label>
 					</div>
 					<p class="w3-center">
 						Op zoek naar een specifiek merk? Tik de merknaam er dan bij.
 					</p>
 					<p class="w3-center">
-						<button class="w3-btn w3-ripple w3-amber" @click="search" :disabled="isSearching" title="Vergelijk prijzen"><i class="fa fa-search"></i> {{ isSearching ? "Bezig met zoeken..." : "Vergelijk prijzen" }}</button>
-						<button class="w3-btn w3-ripple w3-light-gray" @click="share" :disabled="isSearching" title="Delen"><i class="fa fa-share-alt"></i> Delen</button>
-						<button class="w3-btn w3-ripple w3-light-gray" @click="clear" :disabled="isSearching" title="Wissen"><i class="fa fa-trash"></i></button>
+						<button class="w3-btn w3-ripple w3-round-large w3-amber" @click="search" :disabled="isSearching" title="Vergelijk prijzen"><i class="fa fa-search"></i> {{ isSearching ? "Bezig met zoeken..." : "Vergelijk prijzen" }}</button>
+						<button class="w3-btn w3-ripple w3-round-large w3-light-gray" @click="share" :disabled="isSearching" title="Delen"><i class="fa fa-share-alt"></i> Delen</button>
+						<button class="w3-btn w3-ripple w3-round-large w3-light-gray" @click="clear" :disabled="isSearching" title="Wissen"><i class="fa fa-trash"></i></button>
 					</p>
 				</div>
 			</div>
 
 			<div class="w3-light-gray" id="supermarkets" v-show="supermarkets.length > 0">
-				<div class="w3-container w3-content w3-padding-64" style="max-width: 800px">
+				<div class="w3-container w3-content w3-padding-64 " style="max-width: 800px">
 				
 					<h2 class="w3-wide w3-center caps">Totaalprijs</h2>
 					
-					<ul class="w3-ul w3-card-4 w3-light-gray w3-hoverable">
-						<li class="w3-bar" :class="{'w3-amber': supermarket.n == selectedSupermarket?.n}" v-for="supermarket in supermarkets" :key="supermarket.n" @click="selectedSupermarket=supermarket; select()">
+					<ul class="w3-ul w3-card-4 w3-light-gray w3-hoverable w3-round-large">
+						<li class="w3-bar w3-round-large" :class="{'w3-amber': supermarket.n == selectedSupermarket?.n}" v-for="supermarket in supermarkets" :key="supermarket.n" @click="selectedSupermarket=supermarket; select()">
 
 							<table style="width: 100%;">
 								<tr :class="{'w3-hover-amber': supermarket.n == selectedSupermarket?.n}">
@@ -82,7 +91,8 @@
 						</li>
 					</ul>
 					<p class="w3-center">
-						Waarom sommige <a href="#" onclick="alert('Een aantal grote supermarktketens zoals LIDL, Nettorama, Boni maar ook online bezorgservices zoals GORILLAS en Crisp hebben geen prijzen op hun website staan. Hierdoor kunnen ze ook niet meegenomen worden in de prijsvergelijking van Checkjebon.nl.'); return false;" target="_blank">supermarkten ontbreken</a>, zoals LIDL, Nettorama, Boni, etc.
+						Waarom ontbreken er sommige supermarkten, zoals <b>LIDL</b>, <b>Nettorama</b>, <b>Boni?</b><br><br>
+						<i>Een aantal grote supermarktketens zoals <b>LIDL</b>, <b>Nettorama</b>, <b>Boni</b> maar ook online bezorgservices zoals <b>GORILLAS</b> en <b>Crisp</b> hebben geen prijzen op hun website staan. Hierdoor kunnen ze ook niet meegenomen worden in de prijsvergelijking van Checkjebon.nl.</i>
 					</p>
 				</div>
 			</div>
@@ -133,7 +143,7 @@
 					</ul>
 					
 					<p class="w3-center">
-						<button class="w3-btn w3-ripple w3-amber" @click="share" title="Deel je boodschappenlijst"><i class="fa fa-share-alt"></i> Deel je boodschappenlijst</button>
+						<button class="w3-btn w3-ripple w3-round-large w3-amber" @click="share" title="Deel je boodschappenlijst"><i class="fa fa-share-alt"></i> Deel je boodschappenlijst</button>
 					</p>
 
 				</div>
