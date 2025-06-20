@@ -16,6 +16,10 @@ After setting up your shopping list and selecting your preferred supermarket, si
 
 You can share your current shopping list with family members or friends at any time, or use the sharing functionality to use the shopping list created on your desktop or tablet to your phone as you go out to get groceries.
 
+# Including in other products
+
+To include Checkjebon.nl in other products, use the [checkjebon-js](https://github.com/supermarkt/checkjebon-js) library as a starting point. This library will take care of loading the latest data and exposing it in a format that is easy to use.
+
 # Supported supermarkets
 
 Checkjebon.nl is aimed at the Dutch market, and currently aims to provide accurate and recent prices for:
