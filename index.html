@@ -105,11 +105,11 @@
 									</td>
 									<td>
 										<span class="w3-large">
-											<a v-if="!product.isEstimate" v-bind:href="product.link" target="_blank" class="noline" :title="product.originalQuery">
+											<a v-if="!product.isEstimate" v-bind:href="product.link" target="_blank" class="noline" :title="product.originalQuery?.replace(/^x\s/, '')">
 												{{ product.name }}
 											</a>
 											<span v-if="!product.price || product.isEstimate">
-												{{product.originalQuery}}
+												{{product.originalQuery?.replace(/^x\s/, '')}}
 											</span>
 										</span><br>
 										<span class="w3-text-blue-gray">

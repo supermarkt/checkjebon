@@ -114,6 +114,10 @@ var app = new Vue(
 				this.pricesLastUpdated = checkjebon.pricesLastUpdated();
 				this.supermarkets = results.map(s => ({
 					...s,
+					products: s.products.map(p => {
+						p.checked = p.originalQuery.startsWith("x ");
+						return p;
+					}),
 					totalPrice: s.products.reduce((sum, p) => sum + (p.price || 0), 0),
 					notFound: s.products.filter(p => p.isEstimate).length
 				}));
@@ -159,14 +163,14 @@ var app = new Vue(
 		},
 		edit: async function(product, event, message)
 		{
-			var newProduct = window.prompt(message, product.originalQuery);
+			var newProduct = window.prompt(message, product.originalQuery?.replace(/^x\s/, ''));
 			if (newProduct)
 			{
 				this.shoppinglist = this.shoppinglist.split("\n").map(line => 
 				{
 					if (line.includes(product.originalQuery))
 					{
-						line = newProduct;
+						line = (product.originalQuery.startsWith("x ") ? "x " : "") + newProduct;
 					}
 					return line;
 				}).join("\n");
