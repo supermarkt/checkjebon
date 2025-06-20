@@ -15,6 +15,8 @@
 		<!-- Text recognition -->
 		<script src="/js/tesseract/tesseract.min.js"></script>
 		<script src="/js/fuse/fuse.js"></script>
+		<!-- Checkjebon-js -->
+		<script src="https://supermarkt.github.io/checkjebon-js/checkjebon.js"></script>
 	</head>
 	<body class="w3-gray">
 		<div class="w3-content" style="max-width: 2000px; padding-top: 0px;" id="checkjebon">
@@ -54,23 +56,24 @@
 					<h2 class="w3-wide w3-center caps">Totaalprijs</h2>
 					
 					<ul class="w3-ul w3-card-4 w3-light-gray w3-hoverable">
-						<li class="w3-bar" :class="{'w3-amber': supermarket.n == selectedSupermarket?.n}" v-for="supermarket in supermarkets" :key="supermarket.n" @click="selectedSupermarket=supermarket; select()">
-
+						<li class="w3-bar" :class="{'w3-amber': supermarket.code == selectedSupermarket?.code}" v-for="supermarket in supermarkets" :key="supermarket.code" @click="selectedSupermarket=supermarket; select()">
 							<table style="width: 100%;">
-								<tr :class="{'w3-hover-amber': supermarket.n == selectedSupermarket?.n}">
+								<tr :class="{'w3-hover-amber': supermarket.code == selectedSupermarket?.code}">
 									<td style="width: 80px">
-										<img v-bind:src="supermarket.i" class="w3-circle" style="width: 60px" :title="'Logo ' + supermarket.c">
+										<img v-bind:src="supermarket.icon" class="w3-circle" style="width: 60px" :title="'Logo ' + supermarket.name">
 									</td>
 									<td>
-										<a href="#" class="w3-large noline" onclick="return false;" :title="supermarket.c + ': ' + $options.filters.formatPrice(supermarket.totalPrice) + ' euro'">
-											{{supermarket.c}}
+										<a href="#" class="w3-large noline" onclick="return false;" :title="supermarket.name + ': ' + $options.filters.formatPrice(supermarket.totalPrice) + ' euro'">
+											{{supermarket.name}}
 										</a>
 										<br>
 										<span class="w3-text-blue-gray">
 											<span v-if="supermarket.notFound > 0">
-												<i class="fa fa-info-circle"></i> {{supermarket.notFound}} product{{supermarket.notFound==1?"":"en"}} niet gevonden in
+												<i class="fa fa-info-circle"></i> {{supermarket.notFound}} van {{supermarket.products.length | formatCount}} niet gevonden in {{supermarket.totalProducts | formatCount}} producten
 											</span>
-											{{supermarket.d.length | formatCount}} producten
+											<span v-if="supermarket.notFound == 0">
+												{{supermarket.totalProducts | formatCount}} producten
+											</span>
 										</span>
 									</td>
 									<td class="w3-xlarge w3-right-align" style="width: 80px;">
@@ -86,14 +89,14 @@
 					</p>
 				</div>
 			</div>
-			
-			<div class="w3-blue-grey" id="shoppinglist" v-show="selectedSupermarket">
+
+			<div class="w3-blue-grey" id="shoppinglist" v-if="selectedSupermarket">
 				<div class="w3-container w3-content w3-padding-64" style="max-width: 800px">
 					
-					<h2 class="w3-wide w3-center caps">{{ selectedSupermarket?.c }}</h2>
-					
+					<h2 class="w3-wide w3-center caps">{{ selectedSupermarket?.name }}</h2>
+
 					<ul class="w3-ul w3-card-4 w3-light-gray w3-hoverable">
-						<li class="w3-bar" v-for="product in products">
+						<li class="w3-bar" v-for="product in selectedSupermarket.products">
 
 							<table style="width: 100%;" :class="{'w3-text-blue-gray': !product.link || product.checked, 'strike': product.checked}">
 								<tr>
@@ -102,20 +105,23 @@
 									</td>
 									<td>
 										<span class="w3-large">
-											<a v-bind:href="product.link" target="_blank" class="noline" :title="product.name + ': ' + $options.filters.formatPrice(product.price)">
+											<a v-if="!product.isEstimate" v-bind:href="product.link" target="_blank" class="noline" :title="product.originalQuery">
 												{{ product.name }}
 											</a>
+											<span v-if="!product.price || product.isEstimate">
+												{{product.originalQuery}}
+											</span>
 										</span><br>
 										<span class="w3-text-blue-gray">
-											<span v-if="product.size">
+											<span v-if="product.amount">
 												<i class="fa fa-pencil" style="cursor: pointer;" @click="edit(product, $event, 'Bedoelde je soms iets anders? Pas dan de naam van dit product aan.\n\nTip: Hoe specifieker je bent, hoe beter het resultaat. Gebruik bijvoorbeeld &quot;smeerboter&quot; in plaats van &quot;boter&quot; of &quot;1,5 liter halfvolle melk&quot; in plaats van alleen &quot;melk&quot;.')" title="Product aanpassen"></i>
-												{{ product.size | formatAmount }}
+												{{ product.amount | formatAmount }}
 											</span>
-											<span v-if="product.priceNotFound && !product.priceIsEstimate">
+											<span v-if="!product.price && !product.isEstimate">
 												<i class="fa fa-exclamation-triangle" style="cursor: pointer;" @click="edit(product, $event, 'Dit product kon bij geen enkele supermarket gevonden worden.\n\nPas de naam of hoeveelheid aan op je boodschappenlijst en probeer het opnieuw.')" title="Product aanpassen"></i>
 												Niet gevonden
 											</span>
-											<span v-if="product.priceNotFound && product.priceIsEstimate">
+											<span v-if="product.price && product.isEstimate">
 												Niet gevonden, geschatte prijs
 												<i class="fa fa-question-circle" style="cursor: pointer;" @click="edit(product, $event, 'Het lijkt er op dat deze supermarkt dit product niet onder deze naam op hun website heeft staan. Om toch goed je boodschappenlijstje te kunnen vergelijken, is uitgegaan van de gemiddelde prijs van dit product bij andere winkels.\n\nOm het product toch te kunnen vinden, pas de naam of hoeveelheid aan om iets minder specifiek te zoeken.')" title="Product aanpassen"></i>
 											</span>
@@ -142,7 +148,7 @@
 			<div class="w3-light-gray">
 				<div class="w3-container w3-content w3-padding-64" style="max-width: 800px">
 					<h2 class="w3-wide w3-center caps">Over Checkjebon.nl</h2>
-					<p class="w3-opacity w3-center">Prijzen in supermarkten veranderen regelmatig, Checkjebon.nl werkt ze <abbr :title="'Laatst bijgewerkt op ' + pricesLastUpdated">dagelijks</abbr> bij en vertelt je waar je het goedkoopst uit bent voor je boodschappen. Verder is Checkjebon.nl een <a href="https://www.github.com/supermarkt/checkjebon/" target="_blank">open source project</a> en ook de gebruikte <a href="https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json" target="_blank">supermarktdata</a> is gratis te hergebruiken in andere projecten. Neem <a href="mailto:info@checkjebon.nl">contact op</a> voor vragen of suggesties.</p>
+					<p class="w3-opacity w3-center">Prijzen in supermarkten veranderen regelmatig, Checkjebon.nl werkt ze <abbr :title="pricesLastUpdated ? 'Laatst bijgewerkt op ' + pricesLastUpdated : null">dagelijks</abbr> bij en vertelt je waar je het goedkoopst uit bent voor je boodschappen. Verder is Checkjebon.nl een <a href="https://www.github.com/supermarkt/checkjebon/" target="_blank">open source project</a> en ook de gebruikte <a href="https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json" target="_blank">supermarktdata</a> is gratis te hergebruiken in andere projecten. Neem <a href="mailto:info@checkjebon.nl">contact op</a> voor vragen of suggesties.</p>
 				</div>
 			</div>
 		</div>

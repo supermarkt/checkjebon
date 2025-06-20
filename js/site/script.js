@@ -13,17 +13,6 @@ var app = new Vue(
 	},
 	methods:
 	{
-		loadPrices: function()
-		{
-			fetch("data/supermarkets.json").then((response) =>
-			{
-				this.pricesLastUpdated = new Date(response.headers.get("Last-Modified")).toLocaleString();
-				return response.json();
-			}).then((prices) =>
-			{
-				this.prices = prices;
-			});
-		},
 		example: function()
 		{
 			this.shoppinglist = "1,5 liter halfvolle melk\nKnoflooksaus\n400 g shoarma\nPita brood\nKipschnitzel\n250 gram kipfilet\n1 kilo bananen\n1 liter coca cola\nkokosbrood\n500 ml soep\nhalvarine\n";
@@ -112,143 +101,36 @@ var app = new Vue(
 			
 			fileSelector.showPicker();
 		},
-		search: function()
+		search: async function()
 		{
-			if (this.prices.length == 0)
-			{
-				this.isSearching = true;
-				setTimeout(function()
-				{
-					// Still loading prices, wait and retry
-					app.search();
-				}, 100);
+			if (!this.shoppinglist || this.shoppinglist.trim() === "") {
+				this.supermarkets = [];
 				return;
 			}
-			
-			// Get products from shoppinglist
-			this.products = this.shoppinglist.split("\n").filter(product => product.trim() != "").map(product => {
-				var checked = false;
-				if (product.startsWith("x "))
-				{
-					product = product.substring(2);
-					checked = true;
+			this.isSearching = true;
+			const productNames = this.shoppinglist.split("\n").filter(product => product.trim() !== "");
+			try {
+				const results = await checkjebon.getPricesForProducts(productNames);
+				this.pricesLastUpdated = checkjebon.pricesLastUpdated();
+				this.supermarkets = results.map(s => ({
+					...s,
+					totalPrice: s.products.reduce((sum, p) => sum + (p.price || 0), 0),
+					notFound: s.products.filter(p => p.isEstimate).length
+				}));
+				if (!this.selectedSupermarket) {
+					setTimeout(function()
+					{
+						document.getElementById("supermarkets").scrollIntoView({behavior: "smooth", block: "start"});
+					}, 100);
 				}
-				return {name: product, checked: checked};
-			});
-			this.supermarkets = this.prices;
-			
-			/* GET TOTAL PRICES PER SUPERMARKET */
-			this.supermarkets.map(supermarket =>
-			{
-				supermarket.totalPrice = 0;
-				supermarket.notFound = 0;
-				this.products.map(product =>
-				{
-					var existing = findProduct(supermarket.d, product.name);
-				
-					if (existing)
-					{
-						supermarket.totalPrice += existing.p;
-					}
-					else
-					{
-						supermarket.notFound++;
-					}
-				});
-			});
-			
-			// For products without a price, find the average price among other supermarkets to get an approximation. 
-			this.supermarkets.map(supermarket =>
-			{
-				this.products.map(product =>
-				{
-					var existing = findProduct(supermarket.d, product.name);
-				
-					if (!existing)
-					{
-						var price = 0;
-						var count = 0;
-						this.supermarkets.map(supermarket => {
-							var existingForOtherSupermarket = findProduct(supermarket.d, product.name);
-							if (existingForOtherSupermarket)
-							{
-								price += existingForOtherSupermarket.p;
-								count++;
-							}
-						})
-						supermarket.totalPrice += (count > 0 ? (price / count) : 0);
-					}
-					
-				});
-			});
-			
-			// Sort by price, cheapest total first
-			this.supermarkets.sort((a, b) => a.totalPrice - b.totalPrice);
-			setTimeout(function()
-			{
-				document.getElementById("supermarkets").scrollIntoView({behavior: "smooth", block: "start"});
-			}, 100);
-
+			} catch (e) {
+				alert('Er is een fout opgetreden bij het zoeken naar prijzen.');
+				console.error(e);
+			}
 			this.isSearching = false;
 		},
 		select: function()
 		{
-			// Get products from shoppinglist
-			this.products = this.shoppinglist.split("\n").filter(product => product.trim() != "").map(product => {
-				var checked = false;
-				if (product.startsWith("x "))
-				{
-					product = product.substring(2);
-					checked = true;
-				}
-				return {name: product, originalProduct: product, checked: checked};
-			});
-			
-			// Process products for the selected supermarket and get prices
-			this.products.map(product => 
-			{
-				var existing = findProduct(this.selectedSupermarket.d, product.name);
-				
-				if (existing)
-				{
-					product.name = existing.n;
-					product.price = existing.p;
-					product.link = this.selectedSupermarket.u + existing.l;
-					product.size = convertAmountToBase(existing.s);
-				}
-				else
-				{
-					product.price = null;
-					product.link = null;
-					product.priceNotFound = true;
-				}
-
-				return product;
-			});
-			
-			// For products without a price, find the average price among other supermarkets to get an approximation. 
-			this.products.filter(product => !product.price && !product.link).map(product =>
-			{
-				var price = 0;
-				var count = 0;
-			
-				this.supermarkets.map(supermarket => {
-					var existing = findProduct(supermarket.d, product.name);
-					if (existing)
-					{
-						price += existing.p;
-						count++;
-					}
-				})
-				
-				product.price = (count > 0 ? (price / count) : 0);
-				if (product.price)
-				{
-					product.priceIsEstimate = true;
-				}
-				return product;
-			});
-			
 			setTimeout(function()
 			{
 				document.getElementById("shoppinglist").scrollIntoView({behavior: "smooth", block: "start"});
@@ -260,7 +142,7 @@ var app = new Vue(
 			product.checked = event.target.checked;
 			this.shoppinglist = this.shoppinglist.split("\n").map(line => 
 			{
-				if (line.includes(product.originalProduct))
+				if (line.includes(product.originalQuery))
 				{
 					if (line.startsWith("x "))
 					{
@@ -275,21 +157,22 @@ var app = new Vue(
 			}).join("\n");
 			this.saveShoppinglist();
 		},
-		edit: function(product, event, message)
+		edit: async function(product, event, message)
 		{
-			var newProduct = window.prompt(message, product.originalProduct);
+			var newProduct = window.prompt(message, product.originalQuery);
 			if (newProduct)
 			{
 				this.shoppinglist = this.shoppinglist.split("\n").map(line => 
 				{
-					if (line.includes(product.originalProduct))
+					if (line.includes(product.originalQuery))
 					{
 						line = newProduct;
 					}
 					return line;
 				}).join("\n");
 				this.saveShoppinglist();
-				this.select();
+				await this.search();
+				this.selectedSupermarket = this.supermarkets.find(s => s.code == this.selectedSupermarket.code);
 			}
 		},
 		share: async function()
@@ -364,7 +247,6 @@ var app = new Vue(
 	},
 	created: function()
 	{
-		this.loadPrices();
 		this.loadShoppinglist();
 	},
 	filters:
@@ -412,124 +294,3 @@ var app = new Vue(
 		},
 	}
 });
-
-function findProducts(products, value)
-{
-	// If there is any indication of an amount, remove it from the search query.
-	var amount = getAmount(value);
-	if (amount)
-	{
-		value = value.replace(amount, "");
-	}
-	// Find all products that include all words from the search query value.
-	var patterns = value.trim().split(/\s/g).filter(p => p).map(p => new RegExp(p.replace(/\s/g, ""), "i"));
-	var productMatches = products.filter(function(product)
-	{
-		return patterns.every(pattern => pattern.test(product.n));
-	});
-	// Fallback: If there were no matches, find all products that include letters from "value" in the same order as the appear in the original.
-	if (productMatches.length == 0)
-	{
-		patterns = [new RegExp(value.replace(/\s/g, "").split("").join(".*"), "i")];
-		productMatches = products.filter(function(product)
-		{
-			return patterns.every(pattern => pattern.test(product.n));
-		});
-	}
-	// When an amount is specified, return the product that meets this minimum amount.	
-	if (amount)
-	{
-		var baseAmount = convertAmountToBase(amount);
-		productMatches = productMatches.filter(product => compareMinimumAmounts(convertAmountToBase(product.s), baseAmount));
-	}
-	// Order productMatches
-	productMatches.sort(function (a, b)
-	{
-		// Order by length of the pattern match (so "skim milk" goes before "skim coffee milk")
-		var aLength = patterns.reduce((acc, pattern) => acc + a.n.match(pattern)[0].length, 0);
-		var bLength = patterns.reduce((acc, pattern) => acc + b.n.match(pattern)[0].length, 0);
-		// If lengths are a close enough match, return the cheapest product
-		if (Math.abs(aLength - bLength) < 3)
-		{
-			return a.p - b.p
-		}
-		return aLength - bLength;
-	});
-	return productMatches;
-}
-
-function findProduct(products, name)
-{
-	return findProducts(products, name)[0];
-}
-
-var unitofmeasures = 
-[
-	{ unit: "gram", name: "gram", conversion: 1 },
-	{ unit: "gram", name: "gr", conversion: 1 },
-	{ unit: "gram", name: "g", conversion: 1 },
-	{ unit: "gram", name: "kilogram", conversion: 1000 },
-	{ unit: "gram", name: "kilo", conversion: 1000 },
-	{ unit: "gram", name: "kg", conversion: 1000 },
-	{ unit: "gram", name: "k", conversion: 1000 },
-	{ unit: "gram", name: "pond", conversion: 500 },
-	{ unit: "milliliter", name: "milliliter", conversion: 1 },
-	{ unit: "milliliter", name: "mililiter", conversion: 1 },
-	{ unit: "milliliter", name: "ml", conversion: 1 },
-	{ unit: "milliliter", name: "liter", conversion: 1000 },
-	{ unit: "milliliter", name: "l", conversion: 1000 },
-	{ unit: "milliliter", name: "deciliter", conversion: 100 },
-	{ unit: "milliliter", name: "dl", conversion: 100 },
-	{ unit: "milliliter", name: "centiliter", conversion: 10 },
-	{ unit: "milliliter", name: "cl", conversion: 10 },		
-]
-
-var unitofmeasurePattern = new RegExp("([\\d\.,]+)\\s?(" + unitofmeasures.map(unit => unit.name).join("|") + ")", "i");
-
-function getAmount(value)
-{
-	var amount = value.match(unitofmeasurePattern);
-	if (amount)
-	{
-		return amount[0];
-	}
-	else
-	{
-		return null;
-	}
-}
-
-function convertAmountToBase(value)
-{
-	if (value && unitofmeasurePattern.test(value))
-	{
-		var amount = value.match(unitofmeasurePattern);
-		
-		return (amount[1].replace(",", ".") * unitofmeasures.find(unit => unit.name == amount[2].toLowerCase()).conversion) + " " + unitofmeasures.find(unit => unit.name == amount[2].toLowerCase()).unit;
-	}
-	
-	return value;
-}
-
-function compareMinimumAmounts(productAmount, searchAmount)
-{
-	var productAmountValue = parseInt(productAmount.match(/([0-9]+)/));
-	var searchAmountValue = parseInt(searchAmount.match(/([0-9]+)/));
-	var productAmountUnit = productAmount.match(/([a-z]+)/i);
-	var searchAmountUnit = searchAmount.match(/([a-z]+)/i);
-
-	if (productAmountUnit && searchAmountUnit)
-	{
-		productAmountUnit = productAmountUnit[0];
-		searchAmountUnit = searchAmountUnit[0];
-	}
-
-	if (productAmountUnit == searchAmountUnit && productAmountValue >= searchAmountValue)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
