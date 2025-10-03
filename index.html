@@ -5,7 +5,7 @@
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="icon" href="/favicon.ico" type="image/x-icon">
-		<meta name="description" content="Scan je supermarktbon om er achter te komen waar je goedkoper kunt winkelen." />
+		<meta name="description" content="Gebruik je boodschappenlijstje om er achter te komen waar je het goedkoopst kunt winkelen." />
 		<link rel="stylesheet" href="/css/w3/w3.css">
 		<link rel="stylesheet" href="/css/site/style.css">
 		<link rel="stylesheet" href="/css/googlefonts/lato.css">
@@ -25,18 +25,18 @@
 				<div class="w3-container w3-content w3-padding-64" style="max-width:800px">
 					<h2 class="w3-wide w3-center caps">Checkjebon.nl</h2>
 					<p class="w3-opacity w3-center">Bekijk wat je kwijt zou zijn voor dezelfde boodschappen bij een andere supermarkt en bespaar elke keer dat je naar de winkel gaat.</p>
-					<div class="w3-center">
+					<!-- <div class="w3-center">
 						<button class="w3-btn w3-ripple w3-amber" @click="scan" :disabled="isSearching" title="Scan je kassabon"><i class="fa fa-camera"></i> Scan je kassabon</button>
 						<button class="w3-btn w3-ripple w3-light-gray" @click="example" :disabled="isSearching" title="Voorbeeld">Voorbeeld</button>
 						<input type="file" id="file-selector" style="display: none;">
 					</div>
 					<p class="w3-center">
 						- of -
-					</p>
+					</p> -->
 					<div class="w3-center">
 						<label>
 							<p>Schrijf hier je boodschappenlijstje:</p>
-							<textarea class="w3-input" style="height: 300px;" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappen in of gebruik de scan knop om je laatste kassabon te scannen.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel" title="Vul hier je boodschappenlijst in"></textarea>
+							<textarea class="w3-input" style="height: 300px;" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappenlijstje.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel" title="Vul hier je boodschappenlijst in"></textarea>
 						</label>
 					</div>
 					<p class="w3-center">
