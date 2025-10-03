@@ -137,7 +137,7 @@ var app = new Vue(
 		{
 			setTimeout(function()
 			{
-				document.getElementById("shoppinglist").scrollIntoView({behavior: "smooth", block: "start"});
+				document.getElementById("articles").scrollIntoView({behavior: "smooth", block: "start"});
 			}, 100);
 		},
 		check: function(product, event)

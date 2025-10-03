@@ -6,152 +6,149 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="icon" href="/favicon.ico" type="image/x-icon">
 		<meta name="description" content="Gebruik je boodschappenlijstje om er achter te komen waar je het goedkoopst kunt winkelen." />
-		<link rel="stylesheet" href="/css/w3/w3.css">
 		<link rel="stylesheet" href="/css/site/style.css">
 		<link rel="stylesheet" href="/css/googlefonts/lato.css">
 		<link rel="stylesheet" href="/css/fontawesome/font-awesome.min.css">
 		<!-- Vue -->
 		<script src="/js/vue/vue.min.js"></script>
+		<!-- Tailwind CSS -->
+		<script src="/js/tailwindcss/tailwindcss.js"></script>
 		<!-- Text recognition -->
 		<script src="/js/tesseract/tesseract.min.js"></script>
 		<script src="/js/fuse/fuse.js"></script>
 		<!-- Checkjebon-js -->
 		<script src="https://supermarkt.github.io/checkjebon-js/checkjebon.js"></script>
+		<script>
+			tailwind.config = {
+				theme: {
+					extend: {
+						fontFamily: { sans: ['Lato', 'ui-sans-serif', 'system-ui'] },
+					},
+				},
+			}
+		</script>
 	</head>
-	<body class="w3-gray">
-		<div class="w3-content" style="max-width: 2000px; padding-top: 0px;" id="checkjebon">
-		
-			<div class="w3-blue-grey">
-				<div class="w3-container w3-content w3-padding-64" style="max-width:800px">
-					<h2 class="w3-wide w3-center caps">Checkjebon.nl</h2>
-					<p class="w3-opacity w3-center">Bekijk wat je kwijt zou zijn voor dezelfde boodschappen bij een andere supermarkt en bespaar elke keer dat je naar de winkel gaat.</p>
-					<!-- <div class="w3-center">
-						<button class="w3-btn w3-ripple w3-amber" @click="scan" :disabled="isSearching" title="Scan je kassabon"><i class="fa fa-camera"></i> Scan je kassabon</button>
-						<button class="w3-btn w3-ripple w3-light-gray" @click="example" :disabled="isSearching" title="Voorbeeld">Voorbeeld</button>
-						<input type="file" id="file-selector" style="display: none;">
+	<body class="bg-gray-50 min-h-screen font-sans flex flex-col">
+		<main class="flex-1 flex flex-col items-center justify-center w-full">
+			<div class="w-full max-w-2xl py-12 px-4" id="checkjebon">
+			<div class="w-full max-w-2xl">
+				<div class="bg-white rounded-2xl shadow-xl p-8">
+					<h1 class="text-3xl font-extrabold text-center text-gray-900 tracking-tight mb-2">Checkjebon.nl</h1>
+					<p class="text-center text-gray-500 mb-6">Bekijk wat je kwijt zou zijn voor dezelfde boodschappen bij een andere supermarkt en bespaar elke keer dat je naar de winkel gaat.</p>
+					<div class="mb-4">
+						<label for="shoppinglist" class="block text-sm font-medium text-gray-700 mb-1">Schrijf hier je boodschappenlijstje:</label>
+						<textarea id="shoppinglist" class="w-full h-40 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-base" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappenlijstje.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel" title="Vul hier je boodschappenlijst in"></textarea>
 					</div>
-					<p class="w3-center">
-						- of -
-					</p> -->
-					<div class="w3-center">
-						<label>
-							<p>Schrijf hier je boodschappenlijstje:</p>
-							<textarea class="w3-input" style="height: 300px;" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappenlijstje.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel" title="Vul hier je boodschappenlijst in"></textarea>
-						</label>
+					<p class="text-center text-gray-400 text-sm mb-4">Op zoek naar een specifiek merk? Tik de merknaam er dan bij.</p>
+					<div class="flex flex-row flex-wrap justify-center gap-2 sm:gap-3 mt-2">
+						<button type="button" class="inline-flex items-center px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg shadow transition disabled:opacity-50 flex-shrink-0" @click="search" :disabled="isSearching" title="Vergelijk prijzen" aria-label="Vergelijk prijzen">
+							<i class="fa fa-search mr-2" aria-hidden="true"></i>
+							<span class="sr-only">{{ isSearching ? 'Bezig met zoeken...' : 'Vergelijk prijzen' }}</span>
+							<span aria-hidden="true" class="hidden sm:inline">{{ isSearching ? 'Bezig met zoeken...' : 'Vergelijk prijzen' }}</span>
+						</button>
+						<button type="button" class="inline-flex items-center px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg shadow transition disabled:opacity-50 flex-shrink-0" @click="share" :disabled="isSearching" title="Delen" aria-label="Delen">
+							<i class="fa fa-share-alt mr-2" aria-hidden="true"></i>
+							<span class="sr-only">Delen</span>
+							<span aria-hidden="true" class="hidden sm:inline">Delen</span>
+						</button>
+						<button type="button" class="inline-flex items-center px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg shadow transition disabled:opacity-50 flex-shrink-0" @click="example" :disabled="isSearching" title="Voorbeeld" aria-label="Voorbeeld">
+							<i class="fa fa-eye mr-2" aria-hidden="true"></i>
+							<span class="sr-only">Voorbeeld</span>
+							<span aria-hidden="true" class="hidden sm:inline">Voorbeeld</span>
+						</button>
+						<button type="button" class="inline-flex items-center px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg shadow transition disabled:opacity-50 flex-shrink-0" @click="clear" :disabled="isSearching" title="Wissen" aria-label="Wissen">
+							<i class="fa fa-trash mr-2" aria-hidden="true"></i>
+							<span class="sr-only">Wissen</span>
+						</button>
 					</div>
-					<p class="w3-center">
-						Op zoek naar een specifiek merk? Tik de merknaam er dan bij.
-					</p>
-					<p class="w3-center">
-						<button class="w3-btn w3-ripple w3-amber" @click="search" :disabled="isSearching" title="Vergelijk prijzen"><i class="fa fa-search"></i> {{ isSearching ? "Bezig met zoeken..." : "Vergelijk prijzen" }}</button>
-						<button class="w3-btn w3-ripple w3-light-gray" @click="share" :disabled="isSearching" title="Delen"><i class="fa fa-share-alt"></i> Delen</button>
-						<button class="w3-btn w3-ripple w3-light-gray" @click="clear" :disabled="isSearching" title="Wissen"><i class="fa fa-trash"></i></button>
-					</p>
 				</div>
 			</div>
 
-			<div class="w3-light-gray" id="supermarkets" v-show="supermarkets.length > 0">
-				<div class="w3-container w3-content w3-padding-64" style="max-width: 800px">
-				
-					<h2 class="w3-wide w3-center caps">Totaalprijs</h2>
-					
-					<ul class="w3-ul w3-card-4 w3-light-gray w3-hoverable">
-						<li class="w3-bar" :class="{'w3-amber': supermarket.code == selectedSupermarket?.code}" v-for="supermarket in supermarkets" :key="supermarket.code" @click="selectedSupermarket=supermarket; select()">
-							<table style="width: 100%;">
-								<tr :class="{'w3-hover-amber': supermarket.code == selectedSupermarket?.code}">
-									<td style="width: 80px">
-										<img v-bind:src="supermarket.icon" class="w3-circle" style="width: 60px" :title="'Logo ' + supermarket.name">
-									</td>
-									<td>
-										<a href="#" class="w3-large noline" onclick="return false;" :title="supermarket.name + ': ' + $options.filters.formatPrice(supermarket.totalPrice) + ' euro'">
-											{{supermarket.name}}
-										</a>
-										<br>
-										<span class="w3-text-blue-gray">
-											<span v-if="supermarket.notFound > 0">
-												<i class="fa fa-info-circle"></i> {{supermarket.notFound}} van {{supermarket.products.length | formatCount}} niet gevonden in {{supermarket.totalProducts | formatCount}} producten
-											</span>
-											<span v-if="supermarket.notFound == 0">
-												{{supermarket.totalProducts | formatCount}} producten
-											</span>
-										</span>
-									</td>
-									<td class="w3-xlarge w3-right-align" style="width: 80px;">
-										{{ supermarket.totalPrice | formatPrice }}
-									</td>
-								</tr>
-							</table>
-
+			<div class="w-full flex justify-center mt-10" id="supermarkets" v-show="supermarkets.length > 0">
+				<div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
+					<h2 class="text-2xl font-bold text-center text-gray-900 tracking-tight mb-6 uppercase">Totaalprijs</h2>
+					<ul class="divide-y divide-gray-200">
+						<li class="flex items-center py-4 cursor-pointer transition hover:bg-yellow-50 px-2" :class="{'bg-yellow-100': supermarket.code == selectedSupermarket?.code}" v-for="supermarket in supermarkets" :key="supermarket.code" @click="selectedSupermarket=supermarket; select()">
+							<img v-bind:src="supermarket.icon" class="rounded-full mr-4 shadow" style="width: 60px" :title="'Logo ' + supermarket.name">
+							<div class="flex-grow">
+								<a href="#" class="font-semibold text-lg text-gray-900 hover:underline" onclick="return false;" :title="supermarket.name + ': ' + $options.filters.formatPrice(supermarket.totalPrice) + ' euro'">
+									{{supermarket.name}}
+								</a>
+								<div class="text-sm text-gray-500 mt-1">
+									<span v-if="supermarket.notFound > 0">
+										<i class="fa fa-info-circle"></i> {{supermarket.notFound}} van {{supermarket.products.length | formatCount}} niet gevonden in {{supermarket.totalProducts | formatCount}} producten
+									</span>
+									<span v-if="supermarket.notFound == 0">
+										{{supermarket.totalProducts | formatCount}} producten
+									</span>
+								</div>
+							</div>
+							<div class="text-xl font-bold text-right text-gray-800 ml-4" style="width: 80px;">
+								{{ supermarket.totalPrice | formatPrice }}
+							</div>
 						</li>
 					</ul>
-					<p class="w3-center">
-						Waarom sommige <a href="#" onclick="alert('Een aantal grote supermarktketens zoals LIDL, Nettorama, Boni maar ook online bezorgservices zoals GORILLAS en Crisp hebben geen prijzen op hun website staan. Hierdoor kunnen ze ook niet meegenomen worden in de prijsvergelijking van Checkjebon.nl.'); return false;" target="_blank">supermarkten ontbreken</a>, zoals LIDL, Nettorama, Boni, etc.
+					<p class="text-center text-gray-400 text-sm mt-6">
+						Waarom sommige <a href="#" onclick="alert('Een aantal grote supermarktketens zoals LIDL, Nettorama, Boni maar ook online bezorgservices zoals GORILLAS en Crisp hebben geen prijzen op hun website staan. Hierdoor kunnen ze ook niet meegenomen worden in de prijsvergelijking van Checkjebon.nl.'); return false;" target="_blank" class="text-blue-600 hover:underline">supermarkten ontbreken</a>, zoals LIDL, Nettorama, Boni, etc.
 					</p>
 				</div>
 			</div>
 
-			<div class="w3-blue-grey" id="shoppinglist" v-if="selectedSupermarket">
-				<div class="w3-container w3-content w3-padding-64" style="max-width: 800px">
-					
-					<h2 class="w3-wide w3-center caps">{{ selectedSupermarket?.name }}</h2>
-
-					<ul class="w3-ul w3-card-4 w3-light-gray w3-hoverable">
-						<li class="w3-bar" v-for="product in selectedSupermarket.products">
-
-							<table style="width: 100%;" :class="{'w3-text-blue-gray': !product.link || product.checked, 'strike': product.checked}">
-								<tr>
-									<td style="width: 40px">
-										<input type="checkbox" class="w3-check" :checked="product.checked" @click="check(product, $event)">
-									</td>
-									<td>
-										<span class="w3-large">
-											<a v-if="!product.isEstimate" v-bind:href="product.link" target="_blank" class="noline" :title="product.originalQuery?.replace(/^x\s/, '')">
-												{{ product.name }}
-											</a>
-											<span v-if="!product.price || product.isEstimate">
-												{{product.originalQuery?.replace(/^x\s/, '')}}
-											</span>
-										</span><br>
-										<span class="w3-text-blue-gray">
-											<span v-if="product.amount">
-												<i class="fa fa-pencil" style="cursor: pointer;" @click="edit(product, $event, 'Bedoelde je soms iets anders? Pas dan de naam van dit product aan.\n\nTip: Hoe specifieker je bent, hoe beter het resultaat. Gebruik bijvoorbeeld &quot;smeerboter&quot; in plaats van &quot;boter&quot; of &quot;1,5 liter halfvolle melk&quot; in plaats van alleen &quot;melk&quot;.')" title="Product aanpassen"></i>
-												{{ product.amount | formatAmount }}
-											</span>
-											<span v-if="!product.price && !product.isEstimate">
-												<i class="fa fa-exclamation-triangle" style="cursor: pointer;" @click="edit(product, $event, 'Dit product kon bij geen enkele supermarket gevonden worden.\n\nPas de naam of hoeveelheid aan op je boodschappenlijst en probeer het opnieuw.')" title="Product aanpassen"></i>
-												Niet gevonden
-											</span>
-											<span v-if="product.price && product.isEstimate">
-												Niet gevonden, geschatte prijs
-												<i class="fa fa-question-circle" style="cursor: pointer;" @click="edit(product, $event, 'Het lijkt er op dat deze supermarkt dit product niet onder deze naam op hun website heeft staan. Om toch goed je boodschappenlijstje te kunnen vergelijken, is uitgegaan van de gemiddelde prijs van dit product bij andere winkels.\n\nOm het product toch te kunnen vinden, pas de naam of hoeveelheid aan om iets minder specifiek te zoeken.')" title="Product aanpassen"></i>
-											</span>
-										</span>
-									</td>
-									<td class="w3-xlarge w3-right-align" style="width: 80px;">
-										<a v-bind:href="product.link" target="_blank" class="noline" :title="product.name + ': ' + $options.filters.formatPrice(product.price)">
-											{{ !product.link && product.price ? "~" : "" }}{{ product.price | formatPrice }}
-										</a>
-									</td>
-								</tr>
-							</table>
-
+			<div class="w-full flex justify-center mt-10" id="articles" v-if="selectedSupermarket">
+				<div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
+					<h2 class="text-2xl font-bold text-center text-gray-900 tracking-tight mb-6 uppercase">{{ selectedSupermarket?.name }}</h2>
+					<ul class="divide-y divide-gray-200">
+						<li class="flex items-center py-4 transition px-2 hover:bg-yellow-50 cursor-pointer" :class="{'bg-yellow-100': product.checked}" v-for="product in selectedSupermarket.products">
+							<input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 mr-4" :checked="product.checked" @click="check(product, $event)">
+							<div class="flex-grow">
+								<span :class="['font-semibold text-base', product.checked ? 'line-through text-gray-400' : 'text-gray-900']">
+									<a v-if="!product.isEstimate" v-bind:href="product.link" target="_blank" :class="product.checked ? 'line-through text-gray-400 hover:underline' : 'hover:underline'" :title="product.originalQuery?.replace(/^x\s/, '')">
+										{{ product.name }}
+									</a>
+									<span v-if="!product.price || product.isEstimate">
+										{{product.originalQuery?.replace(/^x\s/, '')}}
+									</span>
+								</span>
+								<div class="text-sm text-gray-500 mt-1">
+									<span v-if="product.amount">
+										<i class="fa fa-pencil cursor-pointer" @click="edit(product, $event, 'Bedoelde je soms iets anders? Pas dan de naam van dit product aan.\n\nTip: Hoe specifieker je bent, hoe beter het resultaat. Gebruik bijvoorbeeld &quot;smeerboter&quot; in plaats van &quot;boter&quot; of &quot;1,5 liter halfvolle melk&quot; in plaats van alleen &quot;melk&quot;.')" title="Product aanpassen"></i>
+										{{ product.amount | formatAmount }}
+									</span>
+									<span v-if="!product.price && !product.isEstimate">
+										<i class="fa fa-exclamation-triangle cursor-pointer" @click="edit(product, $event, 'Dit product kon bij geen enkele supermarkt gevonden worden.\n\nPas de naam of hoeveelheid aan op je boodschappenlijst en probeer het opnieuw.')" title="Product aanpassen"></i>
+										Niet gevonden
+									</span>
+									<span v-if="product.price && product.isEstimate">
+										Niet gevonden, geschatte prijs
+										<i class="fa fa-question-circle cursor-pointer" @click="edit(product, $event, 'Het lijkt er op dat deze supermarkt dit product niet onder deze naam op hun website heeft staan. Om toch goed je boodschappenlijstje te kunnen vergelijken, is uitgegaan van de gemiddelde prijs van dit product bij andere winkels.\n\nOm het product toch te kunnen vinden, pas de naam of hoeveelheid aan om iets minder specifiek te zoeken.')" title="Product aanpassen"></i>
+									</span>
+								</div>
+							</div>
+							<div class="text-lg font-bold text-right text-gray-800 ml-4" style="width: 80px;">
+								<a v-bind:href="product.link" target="_blank" class="hover:underline" :title="product.name + ': ' + $options.filters.formatPrice(product.price)">
+									{{ !product.link && product.price ? "~" : "" }}{{ product.price | formatPrice }}
+								</a>
+							</div>
 						</li>
 					</ul>
-					
-					<p class="w3-center">
-						<button class="w3-btn w3-ripple w3-amber" @click="share" title="Deel je boodschappenlijst"><i class="fa fa-share-alt"></i> Deel je boodschappenlijst</button>
-					</p>
-
+					<div class="flex justify-center mt-6">
+						<button type="button" class="inline-flex items-center px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg shadow transition disabled:opacity-50" @click="share" title="Deel je boodschappenlijst" aria-label="Deel je boodschappenlijst">
+							<i class="fa fa-share-alt mr-2" aria-hidden="true"></i>
+							<span class="sr-only">Deel je boodschappenlijst</span>
+							<span aria-hidden="true" class="hidden sm:inline">Deel je boodschappenlijst</span>
+						</button>
+					</div>
 				</div>
 			</div>
 
-			<div class="w3-light-gray">
-				<div class="w3-container w3-content w3-padding-64" style="max-width: 800px">
-					<h2 class="w3-wide w3-center caps">Over Checkjebon.nl</h2>
-					<p class="w3-opacity w3-center">Prijzen in supermarkten veranderen regelmatig, Checkjebon.nl werkt ze <abbr :title="pricesLastUpdated ? 'Laatst bijgewerkt op ' + pricesLastUpdated : null">dagelijks</abbr> bij en vertelt je waar je het goedkoopst uit bent voor je boodschappen. Verder is Checkjebon.nl een <a href="https://www.github.com/supermarkt/checkjebon/" target="_blank">open source project</a> en ook de gebruikte <a href="https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json" target="_blank">supermarktdata</a> is gratis te hergebruiken in andere projecten. Neem <a href="mailto:info@checkjebon.nl">contact op</a> voor vragen of suggesties.</p>
-				</div>
 			</div>
-		</div>
-		<script src="/js/site/script.js"></script>
+		</main>
+		<footer class="w-full bg-gray-100 border-t mt-auto">
+			<div class="max-w-2xl mx-auto py-8 px-4">
+				<h2 class="text-lg font-bold text-center text-gray-900 tracking-tight mb-2 uppercase">Over Checkjebon.nl</h2>
+				<p class="text-center text-gray-500 text-sm">Prijzen in supermarkten veranderen regelmatig, Checkjebon.nl werkt ze <abbr :title="pricesLastUpdated ? 'Laatst bijgewerkt op ' + pricesLastUpdated : null">dagelijks</abbr> bij en vertelt je waar je het goedkoopst uit bent voor je boodschappen. Verder is Checkjebon.nl een <a href="https://www.github.com/supermarkt/checkjebon/" target="_blank" class="text-blue-600 hover:underline">open source project</a> en ook de gebruikte <a href="https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json" target="_blank" class="text-blue-600 hover:underline">supermarktdata</a> is gratis te hergebruiken in andere projecten. Neem <a href="mailto:info@checkjebon.nl" class="text-blue-600 hover:underline">contact op</a> voor vragen of suggesties.</p>
+			</div>
+		</footer>
+	<script src="/js/site/script.js"></script>
 	</body>
 </html>
