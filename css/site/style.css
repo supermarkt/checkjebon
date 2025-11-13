@@ -30,7 +30,3 @@ footer {
 footer > div {
 	box-sizing: border-box;
 }
-
-body {
-	padding-bottom: 3.5rem; /* space for footer height if needed */
-}

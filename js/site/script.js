@@ -121,6 +121,7 @@ var app = new Vue(
 					totalPrice: s.products.reduce((sum, p) => sum + (p.price || 0), 0),
 					notFound: s.products.filter(p => p.isEstimate).length
 				}));
+				this.supermarkets.sort((a, b) => a.totalPrice - b.totalPrice);
 				if (!this.selectedSupermarket) {
 					setTimeout(function()
 					{
