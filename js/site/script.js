@@ -1,3 +1,57 @@
+// Global filters
+Vue.filter('formatPrice', function(value)
+{
+	if (value && value > 0)
+	{
+		return value.toFixed(2).replace(".", ",");
+	}
+	else
+	{
+		return "-";
+	}
+});
+
+Vue.filter('formatAmount', function(value)
+{
+	var pattern = new RegExp("([\\d]+) (gram|milliliter)", "i");
+
+	if (value && pattern.test(value))
+	{
+		var amount = value.match(pattern);
+		if (amount[2].toLowerCase() == "gram" && amount[1] >= 1000)
+		{
+			return (amount[1] / 1000) + " kilogram";
+		}
+		else if (amount[2].toLowerCase() == "milliliter" && amount[1] >= 1000)
+		{
+			return (amount[1] / 1000) + " liter";
+		}
+		else
+		{
+			return value.toLowerCase();
+		}
+	}
+	else
+	{
+		return value?.toLowerCase();
+	}
+});
+
+Vue.filter('formatCount', function(value)
+{
+	// Add thousand separator
+	return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+});
+
+Vue.component('share-button', {
+	template: '#share-button-template'
+});
+
+Vue.component('supermarket-products', {
+	template: '#supermarket-products-template',
+	props: ['supermarket', 'showShareButton']
+});
+
 var app = new Vue(
 {
 	el: "#checkjebon",
@@ -9,10 +63,85 @@ var app = new Vue(
 		products: [],
 		supermarkets: [],
 		selectedSupermarket: null,
-		isSearching: false
+		isSearching: false,
+		shopMultipleSupermarkets: false,
+		maxSupermarkets: null,
+		availableSupermarkets: [],
+		selectedSupermarketCodes: [],
+		shoppingPlan: null,
+		showSupermarketSelection: false
+	},
+	watch:
+	{
+		shopMultipleSupermarkets: function(val)
+		{
+			if (!val)
+			{
+				this.showSupermarketSelection = false;
+				this.shoppingPlan = null;
+			}
+			this.supermarkets = [];
+			this.selectedSupermarket = null;
+			this.saveShoppinglist();
+		}
 	},
 	methods:
 	{
+		loadSupermarkets: async function()
+		{
+			try {
+				this.availableSupermarkets = await checkjebon.getSupermarkets();
+			} catch (e) {
+				console.error("Failed to load supermarkets", e);
+			}
+		},
+		createShoppingPlan: async function(scrollToResults = true)
+		{
+			if (this.selectedSupermarketCodes.length === 0) {
+				this.shoppingPlan = null;
+				return;
+			}
+			
+			this.isSearching = true;
+			const productNames = this.shoppinglist.split("\n").filter(product => product.trim() !== "");
+			
+			try {
+				const result = await checkjebon.getOptimalShoppingPlan(
+					productNames,
+					this.maxSupermarkets,
+					this.selectedSupermarketCodes
+				);
+				
+				// Initialize checked state based on originalQuery
+				result.supermarkets.forEach(s => {
+					s.products.forEach(p => {
+						p.checked = p.originalQuery && p.originalQuery.startsWith("x ");
+					});
+				});
+
+				this.shoppingPlan = result;
+				this.selectedSupermarket = null; // Clear single selection
+				
+				if (scrollToResults) {
+					setTimeout(function()
+					{
+						document.getElementById("shopping-plan").scrollIntoView({behavior: "smooth", block: "start"});
+					}, 100);
+				}
+				
+			} catch (e) {
+				alert('Er is een fout opgetreden bij het maken van het winkelplan.');
+				console.error(e);
+			}
+			this.isSearching = false;
+		},
+		updateShoppingPlan: function()
+		{
+			if (this.shoppingPlan)
+			{
+				this.createShoppingPlan(false);
+			}
+		},
 		example: function()
 		{
 			this.shoppinglist = "1,5 liter halfvolle melk\nKnoflooksaus\n400 g shoarma\nPita brood\nKipschnitzel\n250 gram kipfilet\n1 kilo bananen\n1 liter coca cola\nkokosbrood\n500 ml soep\nhalvarine\n";
@@ -107,7 +236,26 @@ var app = new Vue(
 				this.supermarkets = [];
 				return;
 			}
+
+			if (this.shopMultipleSupermarkets) {
+				this.showSupermarketSelection = true;
+				this.shoppingPlan = null;
+				this.selectedSupermarket = null;
+				this.supermarkets = [];
+				if (this.availableSupermarkets.length === 0) {
+					await this.loadSupermarkets();
+				}
+				setTimeout(function()
+				{
+					const el = document.getElementById("supermarket-selection");
+					if(el) el.scrollIntoView({behavior: "smooth", block: "start"});
+				}, 100);
+				return;
+			}
+
 			this.isSearching = true;
+			this.showSupermarketSelection = false;
+			this.shoppingPlan = null;
 			const productNames = this.shoppinglist.split("\n").filter(product => product.trim() !== "");
 			try {
 				const results = await checkjebon.getPricesForProducts(productNames);
@@ -176,13 +324,24 @@ var app = new Vue(
 					return line;
 				}).join("\n");
 				this.saveShoppinglist();
+				
+				const currentCode = this.selectedSupermarket ? this.selectedSupermarket.code : null;
 				await this.search();
-				this.selectedSupermarket = this.supermarkets.find(s => s.code == this.selectedSupermarket.code);
+				
+				if (currentCode) {
+					this.selectedSupermarket = this.supermarkets.find(s => s.code == currentCode);
+				}
 			}
 		},
 		share: async function()
 		{
-			window.location.hash = this.shoppinglist.replace(/\n/g, "%0A");
+			var hash = this.shoppinglist.replace(/\n/g, "%0A");
+			if (this.shopMultipleSupermarkets) {
+				hash += "|" + (this.shopMultipleSupermarkets ? "1" : "0");
+				hash += "|" + this.maxSupermarkets;
+				hash += "|" + this.selectedSupermarketCodes.join(",");
+			}
+			window.location.hash = hash;
 			var shared = false;
 			// Share the shoppinglist using the device's share functionality
 			if (navigator.share)
@@ -223,19 +382,48 @@ var app = new Vue(
 		saveShoppinglist: function()
 		{
 			localStorage.setItem("shoppinglist", this.shoppinglist);
+			localStorage.setItem("shopMultipleSupermarkets", this.shopMultipleSupermarkets);
+			localStorage.setItem("maxSupermarkets", this.maxSupermarkets);
+			localStorage.setItem("selectedSupermarketCodes", JSON.stringify(this.selectedSupermarketCodes));
 		},
-		loadShoppinglist: function()
+		loadShoppinglist: async function()
 		{
 			// Populate shoppinglist from memory
 			this.shoppinglist = localStorage.getItem("shoppinglist");
+			this.shopMultipleSupermarkets = localStorage.getItem("shopMultipleSupermarkets") === "true";
+			this.maxSupermarkets = parseInt(localStorage.getItem("maxSupermarkets")) || null;
+			try {
+				this.selectedSupermarketCodes = JSON.parse(localStorage.getItem("selectedSupermarketCodes")) || [];
+			} catch(e) {
+				this.selectedSupermarketCodes = [];
+			}
+
 			// Override shoppinglist from URL hash, if present
 			if (window.location.hash)
 			{
 				if (!this.shoppinglist || window.confirm("Druk op OK om de lijst die je net opent te gebruiken of Annuleren om verder te gaan met de lijst die je eerder hebt gemaakt."))
 				{
-					this.shoppinglist = decodeURI(window.location.hash).substr(1);
+					var hashContent = decodeURI(window.location.hash).substr(1);
+					var parts = hashContent.split("|");
+					this.shoppinglist = parts[0];
+					if (parts.length > 1) {
+						this.shopMultipleSupermarkets = parts[1] === "1";
+						this.maxSupermarkets = parseInt(parts[2]) || null;
+						this.selectedSupermarketCodes = parts[3] ? parts[3].split(",") : [];
+					}
 				}
 				window.location.hash = "";
+			}
+
+			if (this.shopMultipleSupermarkets) {
+				this.showSupermarketSelection = true;
+				if (this.availableSupermarkets.length === 0) {
+					await this.loadSupermarkets();
+				}
+				
+				if (this.maxSupermarkets && this.selectedSupermarketCodes.length > 0) {
+					this.createShoppingPlan(true);
+				}
 			}
 		},
 		update: function()
@@ -253,49 +441,5 @@ var app = new Vue(
 	created: function()
 	{
 		this.loadShoppinglist();
-	},
-	filters:
-	{
-		formatPrice: function(value)
-		{
-			if (value && value > 0)
-			{
-				return value.toFixed(2).replace(".", ",");
-			}
-			else
-			{
-				return "-";
-			}
-		},
-		formatAmount: function(value)
-		{
-			var pattern = new RegExp("([\\d]+) (gram|milliliter)", "i");
-
-			if (value && pattern.test(value))
-			{
-				var amount = value.match(pattern);
-				if (amount[2].toLowerCase() == "gram" && amount[1] >= 1000)
-				{
-					return (amount[1] / 1000) + " kilogram";
-				}
-				else if (amount[2].toLowerCase() == "milliliter" && amount[1] >= 1000)
-				{
-					return (amount[1] / 1000) + " liter";
-				}
-				else
-				{
-					return value.toLowerCase();
-				}
-			}
-			else
-			{
-				return value?.toLowerCase();
-			}
-		},
-		formatCount: function(value)
-		{
-			// Add thousand separator
-			return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-		},
 	}
 });

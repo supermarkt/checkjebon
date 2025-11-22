@@ -40,11 +40,15 @@
 						<textarea id="shoppinglist" class="w-full h-60 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-base" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappenlijstje.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel" title="Vul hier je boodschappenlijst in"></textarea>
 					</div>
 					<p class="text-center text-gray-400 text-sm mb-4">Op zoek naar een specifiek merk? Tik de merknaam er dan bij.</p>
+					<div class="flex items-center justify-center mb-4">
+						<input id="shopMultiple" type="checkbox" v-model="shopMultipleSupermarkets" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
+						<label for="shopMultiple" class="ml-2 text-sm font-medium text-gray-700">Winkel bij meerdere supermarkten</label>
+					</div>
 					<div class="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-3 mt-2">
 						<button type="button" class="inline-flex items-center justify-center sm:justify-start px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg shadow transition disabled:opacity-50 flex-shrink-0" @click="search" :disabled="isSearching" title="Vergelijk prijzen" aria-label="Vergelijk prijzen">
 							<i class="fa fa-search sm:mr-2" aria-hidden="true"></i>
-							<span class="sr-only">{{ isSearching ? 'Bezig met zoeken...' : 'Vergelijk prijzen' }}</span>
-							<span aria-hidden="true">{{ isSearching ? 'Bezig met zoeken...' : 'Vergelijk prijzen' }}</span>
+							<span class="sr-only">{{ isSearching ? 'Bezig met zoeken...' : (shopMultipleSupermarkets ? 'Kies supermarkten' : 'Vergelijk prijzen') }}</span>
+							<span aria-hidden="true">{{ isSearching ? 'Bezig met zoeken...' : (shopMultipleSupermarkets ? 'Kies supermarkten' : 'Vergelijk prijzen') }}</span>
 						</button>
 						<div class="flex flex-row flex-wrap justify-center gap-2 sm:gap-3">
 							<button type="button" class="inline-flex items-center justify-center sm:justify-start px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg shadow transition disabled:opacity-50 flex-shrink-0" @click="example" :disabled="isSearching" title="Voorbeeld" aria-label="Voorbeeld">
@@ -60,6 +64,42 @@
 							<button type="button" class="inline-flex items-center justify-center sm:justify-start px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg shadow transition disabled:opacity-50 flex-shrink-0" @click="clear" :disabled="isSearching" title="Wissen" aria-label="Wissen">
 								<i class="fa fa-trash" aria-hidden="true"></i>
 								<span class="sr-only">Wissen</span>
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="w-full flex justify-center mt-10" id="supermarket-selection" v-if="showSupermarketSelection">
+				<div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
+					<h2 class="text-2xl font-bold text-center text-gray-900 mb-6">Winkelplan opstellen</h2>
+					
+					<div class="mb-6">
+						<label class="block text-sm font-medium text-gray-700 mb-2">Hoeveel supermarkten wil je maximaal bezoeken?</label>
+						<select v-model="maxSupermarkets" @change="updateShoppingPlan" class="w-full p-2 border border-gray-300 rounded-lg">
+							<option :value="null" disabled>Kies een aantal...</option>
+							<option v-for="n in availableSupermarkets.length" :value="n">{{ n }}</option>
+						</select>
+					</div>
+
+					<div v-if="maxSupermarkets">
+						<div class="mb-6">
+							<label class="block text-sm font-medium text-gray-700 mb-2">Welke supermarkten kan je allemaal bezoeken:</label>
+							<div class="grid grid-cols-2 gap-4">
+								<div v-for="store in availableSupermarkets" :key="store.code" class="flex items-center">
+									<input type="checkbox" :id="'store-' + store.code" :value="store.code" v-model="selectedSupermarketCodes" @change="updateShoppingPlan" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+									<label :for="'store-' + store.code" class="ml-2 text-sm text-gray-900 flex items-center cursor-pointer">
+										<img :src="store.icon" class="w-6 h-6 mr-2 rounded-full" v-if="store.icon">
+										{{ store.name }}
+									</label>
+								</div>
+							</div>
+						</div>
+
+						<div class="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-3 mt-2">
+							<button v-if="selectedSupermarketCodes.length > 0" class="inline-flex items-center justify-center sm:justify-start px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg shadow transition disabled:opacity-50 flex-shrink-0" @click="createShoppingPlan(true)" :disabled="isSearching">
+								<i class="fa fa-search sm:mr-2" aria-hidden="true"></i>
+								{{ isSearching ? 'Winkelplan samenstellen...' : 'Maak winkelplan' }}
 							</button>
 						</div>
 					</div>
@@ -96,49 +136,21 @@
 				</div>
 			</div>
 
-			<div class="w-full flex justify-center mt-10" id="articles" v-if="selectedSupermarket">
-				<div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
-					<h2 class="text-2xl font-bold text-center text-gray-900 tracking-tight mb-6 uppercase">{{ selectedSupermarket?.name }}</h2>
-					<ul class="divide-y divide-gray-200">
-						<li class="flex items-center py-4 transition px-2 hover:bg-yellow-50 cursor-pointer" :class="{'bg-yellow-100': product.checked}" v-for="product in selectedSupermarket.products">
-							<input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 mr-4" :checked="product.checked" @click="check(product, $event)">
-							<div class="flex-grow">
-								<span :class="['font-semibold text-base', product.checked ? 'line-through text-gray-400' : 'text-gray-900']">
-									<a v-if="!product.isEstimate" v-bind:href="product.link" target="_blank" :class="product.checked ? 'line-through text-gray-400 hover:underline' : 'hover:underline'" :title="product.originalQuery?.replace(/^x\s/, '')">
-										{{ product.name }}
-									</a>
-									<span v-if="!product.price || product.isEstimate">
-										{{product.originalQuery?.replace(/^x\s/, '')}}
-									</span>
-								</span>
-								<div class="text-sm text-gray-500 mt-1">
-									<span v-if="product.amount">
-										<i class="fa fa-pencil cursor-pointer" @click="edit(product, $event, 'Bedoelde je soms iets anders? Pas dan de naam van dit product aan.\n\nTip: Hoe specifieker je bent, hoe beter het resultaat. Gebruik bijvoorbeeld &quot;smeerboter&quot; in plaats van &quot;boter&quot; of &quot;1,5 liter halfvolle melk&quot; in plaats van alleen &quot;melk&quot;.')" title="Product aanpassen"></i>
-										{{ product.amount | formatAmount }}
-									</span>
-									<span v-if="!product.price && !product.isEstimate">
-										<i class="fa fa-exclamation-triangle cursor-pointer" @click="edit(product, $event, 'Dit product kon bij geen enkele supermarkt gevonden worden.\n\nPas de naam of hoeveelheid aan op je boodschappenlijst en probeer het opnieuw.')" title="Product aanpassen"></i>
-										Niet gevonden
-									</span>
-									<span v-if="product.price && product.isEstimate">
-										Niet gevonden, geschatte prijs
-										<i class="fa fa-question-circle cursor-pointer" @click="edit(product, $event, 'Het lijkt er op dat deze supermarkt dit product niet onder deze naam op hun website heeft staan. Om toch goed je boodschappenlijstje te kunnen vergelijken, is uitgegaan van de gemiddelde prijs van dit product bij andere winkels.\n\nOm het product toch te kunnen vinden, pas de naam of hoeveelheid aan om iets minder specifiek te zoeken.')" title="Product aanpassen"></i>
-									</span>
-								</div>
-							</div>
-							<div class="text-lg font-bold text-right text-gray-800 ml-4" style="width: 80px;">
-								<a v-bind:href="product.link" target="_blank" class="hover:underline" :title="product.name + ': ' + $options.filters.formatPrice(product.price)">
-									{{ !product.link && product.price ? "~" : "" }}{{ product.price | formatPrice }}
-								</a>
-							</div>
-						</li>
-					</ul>
-					<div class="flex justify-center mt-6">
-						<button type="button" class="inline-flex items-center px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg shadow transition disabled:opacity-50" @click="share" title="Deel je boodschappenlijst" aria-label="Deel je boodschappenlijst">
-							<i class="fa fa-share-alt mr-2" aria-hidden="true"></i>
-							<span class="sr-only">Deel je boodschappenlijst</span>
-							<span aria-hidden="true" class="hidden sm:inline">Deel je boodschappenlijst</span>
-						</button>
+			<div class="w-full flex justify-center mt-10" id="articles" v-if="selectedSupermarket && !shoppingPlan">
+				<supermarket-products :supermarket="selectedSupermarket" :show-share-button="true" @check="check" @edit="edit" @share="share"></supermarket-products>
+			</div>
+
+			<div class="w-full flex flex-col items-center mt-10" id="shopping-plan" v-if="shoppingPlan">
+				<div class="w-full max-w-2xl mb-4 text-center">
+					<h2 class="text-2xl font-bold text-gray-900">Totaalprijs: {{ shoppingPlan.totalCost | formatPrice }} euro</h2>
+					<p class="text-gray-500">Aantal winkels: {{ shoppingPlan.supermarkets.length }}</p>
+				</div>
+				<div v-for="supermarket in shoppingPlan.supermarkets" :key="supermarket.code" class="w-full flex justify-center mb-8">
+					<supermarket-products :supermarket="supermarket" :show-share-button="false" @check="check" @edit="edit" @share="share"></supermarket-products>
+				</div>
+				<div class="w-full flex justify-center mb-8">
+					<div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full flex justify-center">
+						<share-button @share="share"></share-button>
 					</div>
 				</div>
 			</div>
@@ -151,6 +163,55 @@
 				<p class="text-center text-gray-500 text-sm">Prijzen in supermarkten veranderen regelmatig, Checkjebon.nl werkt ze <abbr :title="pricesLastUpdated ? 'Laatst bijgewerkt op ' + pricesLastUpdated : null">dagelijks</abbr> bij en vertelt je waar je het goedkoopst uit bent voor je boodschappen. Verder is Checkjebon.nl een <a href="https://www.github.com/supermarkt/checkjebon/" target="_blank" class="text-blue-600 hover:underline">open source project</a> en ook de gebruikte <a href="https://github.com/supermarkt/checkjebon/blob/main/data/supermarkets.json" target="_blank" class="text-blue-600 hover:underline">supermarktdata</a> is gratis te hergebruiken in andere projecten. Neem <a href="mailto:info@checkjebon.nl" class="text-blue-600 hover:underline">contact op</a> voor vragen of suggesties.</p>
 			</div>
 		</footer>
-	<script src="/js/site/script.js"></script>
+		<script type="text/x-template" id="share-button-template">
+			<button type="button" class="inline-flex items-center px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg shadow transition disabled:opacity-50" @click="$emit('share')" title="Deel je boodschappenlijst" aria-label="Deel je boodschappenlijst">
+				<i class="fa fa-share-alt mr-2" aria-hidden="true"></i>
+				<span class="sr-only">Deel je boodschappenlijst</span>
+				<span aria-hidden="true" class="hidden sm:inline">Deel je boodschappenlijst</span>
+			</button>
+		</script>
+		<script type="text/x-template" id="supermarket-products-template">
+			<div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
+				<h2 class="text-2xl font-bold text-center text-gray-900 tracking-tight mb-6 uppercase">{{ supermarket?.name }}</h2>
+				<ul class="divide-y divide-gray-200">
+					<li class="flex items-center py-4 transition px-2 hover:bg-yellow-50 cursor-pointer" :class="{'bg-yellow-100': product.checked}" v-for="product in supermarket.products">
+						<input type="checkbox" class="form-checkbox h-5 w-5 text-blue-600 mr-4" :checked="product.checked" @click="$emit('check', product, $event)">
+						<div class="flex-grow">
+							<span :class="['font-semibold text-base', product.checked ? 'line-through text-gray-400' : 'text-gray-900']">
+								<a v-if="!product.isEstimate" v-bind:href="product.link" target="_blank" :class="product.checked ? 'line-through text-gray-400 hover:underline' : 'hover:underline'" :title="product.originalQuery?.replace(/^x\s/, '')">
+									{{ product.name }}
+								</a>
+								<span v-if="!product.price || product.isEstimate">
+									{{product.originalQuery?.replace(/^x\s/, '')}}
+								</span>
+							</span>
+							<div class="text-sm text-gray-500 mt-1">
+								<span v-if="product.amount">
+									<i class="fa fa-pencil cursor-pointer" @click="$emit('edit', product, $event, 'Bedoelde je soms iets anders? Pas dan de naam van dit product aan.\n\nTip: Hoe specifieker je bent, hoe beter het resultaat. Gebruik bijvoorbeeld &quot;smeerboter&quot; in plaats van &quot;boter&quot; of &quot;1,5 liter halfvolle melk&quot; in plaats van alleen &quot;melk&quot;.')" title="Product aanpassen"></i>
+									{{ product.amount | formatAmount }}
+								</span>
+								<span v-if="!product.price && !product.isEstimate">
+									<i class="fa fa-exclamation-triangle cursor-pointer" @click="$emit('edit', product, $event, 'Dit product kon bij geen enkele supermarkt gevonden worden.\n\nPas de naam of hoeveelheid aan op je boodschappenlijst en probeer het opnieuw.')" title="Product aanpassen"></i>
+									Niet gevonden
+								</span>
+								<span v-if="product.price && product.isEstimate">
+									Niet gevonden, geschatte prijs
+									<i class="fa fa-question-circle cursor-pointer" @click="$emit('edit', product, $event, 'Het lijkt er op dat deze supermarkt dit product niet onder deze naam op hun website heeft staan. Om toch goed je boodschappenlijstje te kunnen vergelijken, is uitgegaan van de gemiddelde prijs van dit product bij andere winkels.\n\nOm het product toch te kunnen vinden, pas de naam of hoeveelheid aan om iets minder specifiek te zoeken.')" title="Product aanpassen"></i>
+								</span>
+							</div>
+						</div>
+						<div class="text-lg font-bold text-right text-gray-800 ml-4" style="width: 80px;">
+							<a v-bind:href="product.link" target="_blank" class="hover:underline" :title="product.name + ': ' + $options.filters.formatPrice(product.price)">
+								{{ !product.link && product.price ? "~" : "" }}{{ product.price | formatPrice }}
+							</a>
+						</div>
+					</li>
+				</ul>
+				<div class="flex justify-center mt-6" v-if="showShareButton">
+					<share-button @share="$emit('share')"></share-button>
+				</div>
+			</div>
+		</script>
+		<script src="/js/site/script.js"></script>
 	</body>
 </html>
