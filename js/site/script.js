@@ -120,7 +120,44 @@ var app = new Vue(
 				});
 
 				this.shoppingPlan = result;
+				// Ensure each supermarket in the shopping plan has totalPrice and notFound properties
+				this.shoppingPlan.supermarkets = this.shoppingPlan.supermarkets.map(s => ({
+					...s,
+					products: s.products.map(p => (p)),
+					totalPrice: s.products.reduce((sum, p) => sum + (p.price || 0), 0),
+					notFound: s.products.filter(p => p.isEstimate).length
+				}));
 				this.selectedSupermarket = null; // Clear single selection
+
+				// Compute aggregate values for the shopping plan
+				// totalCost: sum of assigned products' prices
+				this.shoppingPlan.totalCost = this.shoppingPlan.supermarkets.reduce((sum, s) => sum + (s.totalPrice || 0), 0);
+
+				// Compute best single-supermarket total using current product list and selected supermarket codes
+				try {
+					const allPricesResults = await checkjebon.getPricesForProducts(productNames);
+					// Filter to only supermarkets that were selectable for this plan (selectedSupermarketCodes)
+					const filtered = allPricesResults.filter(s => this.selectedSupermarketCodes.includes(s.code));
+					const singleTotals = filtered.map(s => ({
+						code: s.code,
+						name: s.name,
+						totalPrice: s.products.reduce((sum, p) => sum + (p.price || 0), 0)
+					}));
+					if (singleTotals.length > 0) {
+						const best = singleTotals.reduce((min, s) => s.totalPrice < min.totalPrice ? s : min, singleTotals[0]);
+						this.shoppingPlan.bestSingleTotal = best.totalPrice;
+						this.shoppingPlan.bestSingleName = best.name;
+						this.shoppingPlan.totalSavings = (this.shoppingPlan.bestSingleTotal || 0) - this.shoppingPlan.totalCost;
+					} else {
+						this.shoppingPlan.bestSingleTotal = null;
+						this.shoppingPlan.bestSingleName = null;
+						this.shoppingPlan.totalSavings = 0;
+					}
+				} catch (e) {
+					console.error('Failed to compute single-shop totals', e);
+					this.shoppingPlan.bestSingleTotal = null;
+					this.shoppingPlan.totalSavings = 0;
+				}
 				
 				if (scrollToResults) {
 					setTimeout(function()
@@ -415,21 +452,36 @@ var app = new Vue(
 				window.location.hash = "";
 			}
 
-			if (this.shopMultipleSupermarkets) {
+			if (this.shopMultipleSupermarkets && this.shoppinglist && this.shoppinglist.trim() !== '') {
+				// Only show the supermarket selection on load when there is a non-empty shopping list.
 				this.showSupermarketSelection = true;
 				if (this.availableSupermarkets.length === 0) {
 					await this.loadSupermarkets();
 				}
-				
+			
 				if (this.maxSupermarkets && this.selectedSupermarketCodes.length > 0) {
 					this.createShoppingPlan(true);
 				}
+			} else {
+				// Ensure the supermarket selection and any results are hidden when there's
+				// no shopping list during initial page load.
+				this.showSupermarketSelection = false;
+				this.shoppingPlan = null;
+				this.supermarkets = [];
+				this.selectedSupermarket = null;
 			}
 		},
 		update: function()
 		{
 			this.selectedSupermarket = null;
 			this.supermarkets = [];
+			
+			if (this.shopMultipleSupermarkets)
+			{
+				this.showSupermarketSelection = false;
+				this.shoppingPlan = null;
+			}
+
 			this.saveShoppinglist();
 		},
 		clear: function()

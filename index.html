@@ -36,17 +36,15 @@
 					<h1 class="text-3xl font-extrabold text-center text-gray-900 tracking-tight mb-2">Checkjebon.nl</h1>
 					<p class="text-center text-gray-500 mb-6">Bekijk wat je kwijt zou zijn voor dezelfde boodschappen bij een andere supermarkt en bespaar elke keer dat je naar de winkel gaat.</p>
 					<div class="mb-4">
-						<label for="shoppinglist" class="block text-sm font-medium text-gray-700 mb-1">Schrijf hier je boodschappenlijstje:</label>
-						<textarea id="shoppinglist" class="w-full h-60 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-base" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappenlijstje.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel" title="Vul hier je boodschappenlijst in"></textarea>
+						<textarea id="shoppinglist" class="w-full h-80 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-base" v-model="shoppinglist" @input="update" :disabled="isSearching" placeholder="Tik hier je boodschappenlijstje.&#10;&#10;halfvolle melk&#10;volkoren brood&#10;zilvervliesrijst&#10;bananen&#10;stokbrood&#10;falafel&#10;&#10;Op zoek naar een specifiek merk? Tik de merknaam er dan bij." title="Vul hier je boodschappenlijst in"></textarea>
 					</div>
-					<p class="text-center text-gray-400 text-sm mb-4">Op zoek naar een specifiek merk? Tik de merknaam er dan bij.</p>
 					<div class="flex items-center justify-center mb-4">
 						<input id="shopMultiple" type="checkbox" v-model="shopMultipleSupermarkets" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500">
 						<label for="shopMultiple" class="ml-2 text-sm font-medium text-gray-700">Winkel bij meerdere supermarkten</label>
 					</div>
 					<div class="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-3 mt-2">
-						<button type="button" class="inline-flex items-center justify-center sm:justify-start px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg shadow transition disabled:opacity-50 flex-shrink-0" @click="search" :disabled="isSearching" title="Vergelijk prijzen" aria-label="Vergelijk prijzen">
-							<i class="fa fa-search sm:mr-2" aria-hidden="true"></i>
+						<button type="button" class="inline-flex items-center justify-center sm:justify-start px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg shadow transition disabled:opacity-50 flex-shrink-0" @click="search" :disabled="isSearching || !shoppinglist || shoppinglist.trim() === ''" title="Vergelijk prijzen" aria-label="Vergelijk prijzen">
+							<i class="fa fa-search mr-2" aria-hidden="true"></i>
 							<span class="sr-only">{{ isSearching ? 'Bezig met zoeken...' : (shopMultipleSupermarkets ? 'Kies supermarkten' : 'Vergelijk prijzen') }}</span>
 							<span aria-hidden="true">{{ isSearching ? 'Bezig met zoeken...' : (shopMultipleSupermarkets ? 'Kies supermarkten' : 'Vergelijk prijzen') }}</span>
 						</button>
@@ -75,7 +73,7 @@
 					<h2 class="text-2xl font-bold text-center text-gray-900 mb-6">Winkelplan opstellen</h2>
 					
 					<div class="mb-6">
-						<label class="block text-sm font-medium text-gray-700 mb-2">Hoeveel supermarkten wil je maximaal bezoeken?</label>
+						<label class="block text-sm font-medium text-gray-700 mb-2">Tot hoeveel supermarkten wil je bezoeken?</label>
 						<select v-model="maxSupermarkets" @change="updateShoppingPlan" class="w-full p-2 border border-gray-300 rounded-lg">
 							<option :value="null" disabled>Kies een aantal...</option>
 							<option v-for="n in availableSupermarkets.length" :value="n">{{ n }}</option>
@@ -84,21 +82,21 @@
 
 					<div v-if="maxSupermarkets">
 						<div class="mb-6">
-							<label class="block text-sm font-medium text-gray-700 mb-2">Welke supermarkten kan je allemaal bezoeken:</label>
-							<div class="grid grid-cols-2 gap-4">
-								<div v-for="store in availableSupermarkets" :key="store.code" class="flex items-center">
-									<input type="checkbox" :id="'store-' + store.code" :value="store.code" v-model="selectedSupermarketCodes" @change="updateShoppingPlan" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
-									<label :for="'store-' + store.code" class="ml-2 text-sm text-gray-900 flex items-center cursor-pointer">
-										<img :src="store.icon" class="w-6 h-6 mr-2 rounded-full" v-if="store.icon">
-										{{ store.name }}
-									</label>
+							<label class="block text-sm font-medium text-gray-700 mb-2">Kies je supermarkten:</label>
+								<div class="grid grid-cols-2 sm:grid-cols-4 gap-6 justify-center justify-items-center">
+									<div v-for="store in availableSupermarkets" :key="store.code" class="flex">
+										<input type="checkbox" :id="'store-' + store.code" :value="store.code" v-model="selectedSupermarketCodes" @change="updateShoppingPlan" class="hidden">
+										<label :for="'store-' + store.code" class="cursor-pointer flex flex-col items-center p-3 w-34 rounded-lg transition" :class="selectedSupermarketCodes.includes(store.code) ? 'bg-yellow-50 border border-yellow-300 ring-2 ring-yellow-300' : 'bg-white border border-gray-100 hover:shadow-md'">
+											<img :src="store.icon" class="w-24 h-24 rounded-full mb-2 object-cover" v-if="store.icon">
+											<span class="text-sm text-gray-900 text-center">{{ store.name }}</span>
+										</label>
+									</div>
 								</div>
-							</div>
 						</div>
 
 						<div class="flex flex-col sm:flex-row flex-wrap justify-center gap-2 sm:gap-3 mt-2">
 							<button v-if="selectedSupermarketCodes.length > 0" class="inline-flex items-center justify-center sm:justify-start px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg shadow transition disabled:opacity-50 flex-shrink-0" @click="createShoppingPlan(true)" :disabled="isSearching">
-								<i class="fa fa-search sm:mr-2" aria-hidden="true"></i>
+								<i class="fa fa-search mr-2" aria-hidden="true"></i>
 								{{ isSearching ? 'Winkelplan samenstellen...' : 'Maak winkelplan' }}
 							</button>
 						</div>
@@ -108,7 +106,7 @@
 
 			<div class="w-full flex justify-center mt-10" id="supermarkets" v-show="supermarkets.length > 0">
 				<div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full">
-					<h2 class="text-2xl font-bold text-center text-gray-900 tracking-tight mb-6 uppercase">Totaalprijs</h2>
+					<h2 class="text-2xl font-bold text-center text-gray-900 tracking-tight mb-6 uppercase">Supermarkten</h2>
 					<ul class="divide-y divide-gray-200">
 						<li class="flex items-center py-4 cursor-pointer transition hover:bg-yellow-50 px-2" :class="{'bg-yellow-100': supermarket.code == selectedSupermarket?.code}" v-for="supermarket in supermarkets" :key="supermarket.code" @click="selectedSupermarket=supermarket; select()">
 							<img v-bind:src="supermarket.icon" class="rounded-full mr-4 shadow" style="width: 60px" :title="'Logo ' + supermarket.name">
@@ -142,16 +140,41 @@
 
 			<div class="w-full flex flex-col items-center mt-10" id="shopping-plan" v-if="shoppingPlan">
 				<div class="w-full max-w-2xl mb-4 text-center">
-					<h2 class="text-2xl font-bold text-gray-900">Totaalprijs: {{ shoppingPlan.totalCost | formatPrice }} euro</h2>
-					<p class="text-gray-500">Aantal winkels: {{ shoppingPlan.supermarkets.length }}</p>
+					<div v-if="shoppingPlan.supermarkets.length > 1" class="bg-white rounded-lg p-4 mb-4">
+						<h2 class="text-xl font-semibold mb-2">Winkelplan overzicht</h2>
+						<div class="overflow-x-auto">
+							<table class="w-full text-left">
+								<tbody>
+									<tr v-for="s in shoppingPlan.supermarkets" :key="s.code" class="border-t">
+										<td class="py-2">{{ s.name }}</td>
+										<td class="py-2 text-right">{{ s.totalPrice | formatPrice }}</td>
+									</tr>
+									<tr class="border-t font-bold">
+										<td class="py-2">Totaal</td>
+										<td class="py-2 text-right">{{ shoppingPlan.totalCost | formatPrice }}</td>
+									</tr>
+									<tr v-if="shoppingPlan.bestSingleTotal != null" class="border-t">
+										<td class="py-2">Als je alle producten bij de goedkoopste winkel koopt ({{ shoppingPlan.bestSingleName }})</td>
+										<td class="py-2 text-right">{{ shoppingPlan.bestSingleTotal | formatPrice }}</td>
+									</tr>
+									<tr v-if="shoppingPlan.bestSingleTotal != null" class="border-t bg-green-50">
+										<td class="py-2">Extra besparing</td>
+										<td class="py-2 text-right text-green-700 font-semibold">{{ shoppingPlan.totalSavings | formatPrice }}</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<div class="flex justify-center mt-6">
+							<share-button @share="$emit('share')"></share-button>
+						</div>
+					</div>
+					<div v-else class="bg-white rounded-lg p-4 mb-4">
+						<h2 class="text-2xl font-bold text-gray-900">Totaalprijs: {{ shoppingPlan.totalCost | formatPrice }}</h2>
+						<p class="text-gray-500">Aantal winkels: {{ shoppingPlan.supermarkets.length }}</p>
+					</div>
 				</div>
 				<div v-for="supermarket in shoppingPlan.supermarkets" :key="supermarket.code" class="w-full flex justify-center mb-8">
 					<supermarket-products :supermarket="supermarket" :show-share-button="false" @check="check" @edit="edit" @share="share"></supermarket-products>
-				</div>
-				<div class="w-full flex justify-center mb-8">
-					<div class="bg-white rounded-2xl shadow-xl p-8 max-w-2xl w-full flex justify-center">
-						<share-button @share="share"></share-button>
-					</div>
 				</div>
 			</div>
 
@@ -166,7 +189,7 @@
 		<script type="text/x-template" id="share-button-template">
 			<button type="button" class="inline-flex items-center px-5 py-2 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-lg shadow transition disabled:opacity-50" @click="$emit('share')" title="Deel je boodschappenlijst" aria-label="Deel je boodschappenlijst">
 				<i class="fa fa-share-alt mr-2" aria-hidden="true"></i>
-				<span class="sr-only">Deel je boodschappenlijst</span>
+				<span>Deel je boodschappenlijst</span>
 				<span aria-hidden="true" class="hidden sm:inline">Deel je boodschappenlijst</span>
 			</button>
 		</script>
@@ -207,6 +230,13 @@
 						</div>
 					</li>
 				</ul>
+
+				<div class="flex justify-center mt-4" v-if="supermarket.totalPrice != null">
+					<div class="text-xl font-bold text-gray-800 text-center">
+						Totaal {{ supermarket?.name }}: {{ supermarket.totalPrice | formatPrice }}
+					</div>
+				</div>
+
 				<div class="flex justify-center mt-6" v-if="showShareButton">
 					<share-button @share="$emit('share')"></share-button>
 				</div>
