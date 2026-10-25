@@ -25,20 +25,20 @@ To include Checkjebon.nl in other products, use the [checkjebon-js](https://gith
 Checkjebon.nl is aimed at the Dutch market, and currently aims to provide accurate and recent prices for:
 
 * [AH](https://www.ah.nl/)
-* [ALDI](https://www.aldi.nl/) - Note; limited assortment due to not all products being available online.
-* [Coop](https://www.coop.nl/)
 * [DekaMarkt](https://www.dekamarkt.nl/) - Note; limited assortment due to not all products being available online.
 * [Dirk](https://www.dirk.nl/)
 * [Hoogvliet](https://www.hoogvliet.com/)
-* [Jan Linders](https://www.janlinders.nl/)
 * [Jumbo](https://www.jumbo.com/)
+* [LIDL](https://www.lidl.nl/) - (via boodschaapje.nl)
 * [Picnic](http://picnic.nl/) - Note; no links to products
 * [Plus](https://www.plus.nl/)
+* [Poiesz](https://www.poiesz-supermarkten.nl/) - Note; limited assortment.
 * [SPAR](https://www.spar.nl/)
-* [Vomar](https://www.vomar.nl/)
+* [Vomar](https://www.vomar.nl/) - Note; limited assortment.
 
 Some supermarkets do not provide prices for their products online or are not yet indexed on a daily basis, and therefor are currently not included in the data set:
 
+* [ALDI](https://www.aldi.nl/) - No products currently indexed in data set.
 * [Boni](https://bonisupermarkt.nl/) - No online assortment.
 * [Boon's Markt (MCD)](https://www.boonsmarkt.nl/) - No online assortment.
 * [Butlon](https://butlon.com/) - Not yet indexed.
@@ -50,10 +50,8 @@ Some supermarkets do not provide prices for their products online or are not yet
 * [Hanos](https://hanos.nl/) - No online assortment without an account.
 * [Makro](https://www.makro.nl/) - Not yet indexed.
 * [Marqt](https://www.marqt.nl/) - No online assortment.
-* [LIDL](https://www.lidl.nl/) - No online assortment.
 * [Nettorama](https://www.nettorama.nl/) - No online assortment.
 * [Odin](https://www.odin.nl/) -  Not yet indexed.
-* [Poiesz](https://www.poiesz-supermarkten.nl/) - Not yet indexed.
 * [Sligro](https://www.sligro.nl/) - No online assortment without an account.
 
 # Product selection algorithm
